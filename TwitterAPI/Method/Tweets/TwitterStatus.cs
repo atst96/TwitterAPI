@@ -290,16 +290,10 @@ namespace TwitterAPI
         /// ツイートと画像の投稿
         /// </summary>
         /// <param name="Tweet">ツイート内容</param>
-        /// <param name="fileName">画像ファイル名</param>
+        /// <param name="fileName">画像データ(バイト配列)</param>
         /// <param name="tokens">OAuthTokens</param>
         /// <param name="options">オプション</param>
         /// <returns></returns>
-        public static TwitterResponse<TwitterStatus> UpdateWithMedia
-            (string Tweet, string fileName, OAuthTokens tokens, StatusUpdateOptions options = null)
-        {
-            return TwitterStatusCommand.UpdateWithMedia(Tweet, fileName, tokens, options);
-        }
-
 		public static TwitterResponse<TwitterStatus> UpdateWithMedia
 			(string Tweet, byte[] content, OAuthTokens tokens, StatusUpdateOptions options = null)
 		{

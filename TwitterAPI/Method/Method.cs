@@ -35,90 +35,10 @@ namespace TwitterAPI
         /// <returns>RequestResult</returns>
         public static ResponseResult Get(string url, OAuthTokens tokens, ParameterClass param = null)
         {
-			return GenerateResponseResult(GenerateWebRequest(url, WebMethod.GET, tokens, param, null, null, null));
+			return GenerateResponseResult(GenerateWebRequest(url, WebMethod.GET, tokens, param, null, null, null, null));
         }
 
-		/*public static ResponseResult Get(string url, OAuthTokens tokens, ParameterClass param = null)
-		{
-			OAuthBase oauth = new OAuthBase();
-
-			// タイムスタンプの生成
-			string timestamp = oauth.GenerateTimeStamp();
-
-			// nonceの生成
-			string nonce = oauth.GenerateNonce();
-
-			string normalizedUrl, normalizedReqParams;
-
-			// DictionaryをURLのパラメータに変換
-			if (param != null)
-			{
-				url += param.GenerateGetParameters();
-			}
-
-			// シグネチャの生成
-			string signature = oauth.GenerateSignature(new Uri(url),
-				tokens.ConsumerKey, tokens.ConsumerSecret, tokens.AccessToken, tokens.AccessTokenSecret,
-				"GET", timestamp, nonce, out normalizedUrl, out normalizedReqParams);
-
-			string requestUrl = string.Format("{0}?{1}&oauth_signature={2}",
-				normalizedUrl, normalizedReqParams, Uri.EscapeDataString(signature));
-
-			WebRequest req = WebRequest.Create(requestUrl);
-			req.Proxy = Core.Config.Proxy;
-
-			ResponseResult result = new ResponseResult();
-
-			try
-			{
-				WebResponse res = req.GetResponse();
-				StreamReader reader = new StreamReader(res.GetResponseStream());
-				result.ResponseStream = reader.ReadToEnd();
-				result.Result = StatusResult.Success;
-
-				result.AccessLevel = StringToLevelEnum(res.Headers["x-access-level"]);
-				result.RateLimited = new RateLimited(res.Headers["x-rate-limit-limit"],
-					res.Headers["x-rate-limig-remaining"], res.Headers["x-rate-limit-reset"]);
-
-				result.Url = res.ResponseUri.ToString();
-
-				res.Close();
-			}
-			catch (WebException ex)
-			{
-				result.Result = GetStatusResult(ex.Status);
-				result.ResponseStream = null;
-				using (StreamReader reader = new StreamReader(ex.Response.GetResponseStream()))
-				{
-					System.Windows.Forms.MessageBox.Show(ex.Response.Headers.ToString());
-					JObject obj = (JObject)JsonConvert.DeserializeObject(reader.ReadToEnd());
-					var errors = obj.SelectToken("errors", false);
-					if (errors != null)
-					{
-						if (errors.Type == JTokenType.String)
-						{
-							result.Error = new TwitterError();
-							result.Error.Message = errors.ToString();
-						}
-						else if (errors.Type == JTokenType.Array)
-						{
-							result.Error = new TwitterError();
-							result.Error = JsonConvert.DeserializeObject<List<TwitterError>>(errors.ToString())[0];
-						}
-
-					}
-				}
-				result.AccessLevel = StringToLevelEnum(ex.Response.Headers["x-access-level"]);
-				result.RateLimited = new RateLimited(ex.Response.Headers["x-rate-limit-limit"],
-					ex.Response.Headers["x-rate-limit-remaining"], ex.Response.Headers["x-rate-limit-reset"]);
-				result.Url = ex.Response.ResponseUri.ToString();
-
-			}
-
-			return result;
-		}*/
-
-		public static HttpWebRequest GenerateWebRequest(string url, WebMethod method,OAuthTokens tokens, ParameterClass parameters,string contentType, string postData, WebProxy proxy)
+		public static HttpWebRequest GenerateWebRequest(string url, WebMethod method,OAuthTokens tokens, ParameterClass parameters,string contentType, string postHeader, byte[] data, WebProxy proxy)
 		{
 			OAuthBase oauth = new OAuthBase();
 
@@ -127,8 +47,9 @@ namespace TwitterAPI
 			if(parameters != null)
 			{
 				string param = parameters.GenerateGetParameters();
-				if (!string.IsNullOrEmpty(param))
-					url += param;
+				if (!string.IsNullOrEmpty(param)) addr += param;
+
+				System.Windows.Forms.MessageBox.Show(addr);
 			}
 
 			HttpWebRequest req = null;
@@ -151,27 +72,20 @@ namespace TwitterAPI
 			{
 				req = HttpWebRequest.Create(addr) as HttpWebRequest;
 
-				string signatureBase = oauth.GenerateSignatureBase(new Uri(addr), tokens.ConsumerKey, tokens.AccessToken, tokens.AccessTokenSecret, "POST", timestamp, nonce, "HMAC-SHA1", out normalizedUrl, out normalizedReqParams),
+				string signatureBase = oauth.GenerateSignatureBase(new Uri(addr), tokens.ConsumerKey, tokens.AccessToken, tokens.AccessTokenSecret, "POST", timestamp, nonce, "HMAC-SHA1", out normalizedUrl, out normalizedReqParams) + (!string.IsNullOrEmpty(postHeader) ? Uri.EscapeDataString("&" + postHeader) : ""),
 					compositKey = string.Concat(Uri.EscapeDataString(tokens.ConsumerSecret), "&", Uri.EscapeDataString(tokens.AccessTokenSecret)), oauthSignature;
 				using (HMACSHA1 hasher = new HMACSHA1(UTF8Encoding.UTF8.GetBytes(compositKey))) oauthSignature = Convert.ToBase64String(hasher.ComputeHash(UTF8Encoding.UTF8.GetBytes(signatureBase)));
 
 				signature = string.Format("OAuth {0}\", oauth_signature=\"{1}\"", normalizedReqParams.Replace("=", "=\"").Replace("&", "\", "), Uri.EscapeDataString(oauthSignature));
 				req.Headers.Add(HttpRequestHeader.Authorization, signature);
 				req.Method = "POST";
-				req.ContentType = contentType;
+				if (!string.IsNullOrEmpty(contentType)) req.ContentType = contentType;
 
-				if (!string.IsNullOrEmpty(postData))
-				{
-					using (Stream stream = req.GetRequestStream())
-					{
-						byte[] data = UTF8Encoding.UTF8.GetBytes(postData);
-						stream.Write(data, 0, data.Length);
-					}
-				}
+				if (data != null) using (Stream stream = req.GetRequestStream()) stream.Write(data, 0, data.Length);
 			}
 
 			ServicePointManager.Expect100Continue = false;
-			req.Proxy = proxy;
+			//req.Proxy = proxy;
 
 			return req;
 		}
@@ -241,17 +155,6 @@ namespace TwitterAPI
                 o is long || o is long || o is ulong || o is float || o is double || o is decimal;
         }
 
-		/*private HttpWebRequest GenerateRequest(string method, string reqUrl, OAuthTokens tokens, ParameterClass param = null, byte[] data = null, string contentType = "")
-		{
-			string url = reqUrl;
-			if (param != null) url += param.GenerateParameters("GET");
-
-			string nonce = Convert.ToBase64String(new ASCIIEncoding().GetBytes(DateTime.Now.Ticks.ToString()));
-			string timestamp = oauth.GenerateTimeStamp();
-
-
-
-		}*/
 
 		public static ResponseResult xAuthOAuthGet(string url, OAuthTokens tokens, string username, string password, Dictionary<string, string> param = null, string mode = "client_auth")
 		{
@@ -332,159 +235,18 @@ namespace TwitterAPI
 			return result;
 		}
 
-        public static ResponseResult Post(string reqUrl, OAuthTokens tokens, string postData = "",
-            string contentType = "",Dictionary<string, string> param = null)
-        {
-            string url = reqUrl;
-            if (param != null) url += ConvertMethod.DictionaryToParams(param);
+		public static ResponseResult Post(string url, OAuthTokens tokens, ParameterClass parameters, string contentType, string postHeader, byte[] data, WebProxy proxy)
+		{
+			return GenerateResponseResult(GenerateWebRequest(url, WebMethod.POST, tokens, parameters, contentType, postHeader, data, proxy));
+		}
 
-            string nonce = Convert.ToBase64String(new ASCIIEncoding().GetBytes(DateTime.Now.Ticks.ToString()));
-            string timestamp = oauth.GenerateTimeStamp();
-
-            string cType = "";
-
-            if (string.IsNullOrEmpty(contentType)) cType = "application/x-www-form-urlencoded";
-            else cType = contentType;
-
-            string normalizedUrl, normalizedReqParam;
-
-            string signatureBase = oauth.GenerateSignatureBase(new Uri(url), tokens.ConsumerKey, tokens.AccessToken, tokens.ConsumerSecret,
-                "POST", timestamp, nonce, "HMAC-SHA1", out normalizedUrl, out normalizedReqParam);
-            if (!string.IsNullOrEmpty(postData)) signatureBase += Uri.EscapeDataString("&" + postData);
-
-            var conpositeKey = string.Concat(Uri.EscapeDataString(tokens.ConsumerSecret),
-                "&", Uri.EscapeDataString(tokens.AccessTokenSecret));
-            string oauth_signature = "";
-            using (HMACSHA1 hasher = new HMACSHA1(UTF8Encoding.UTF8.GetBytes(conpositeKey)))
-            {
-                oauth_signature = Convert.ToBase64String(
-                    hasher.ComputeHash(UTF8Encoding.UTF8.GetBytes(signatureBase)));
-            }
-
-            string signature = "OAuth " + normalizedReqParam;
-            signature = signature.Replace("=", "=\"");
-            signature = signature.Replace("&", "\", ");
-            signature += "\", oauth_signature=\"" + Uri.EscapeDataString(oauth_signature)+ "\"";
-
-            ServicePointManager.Expect100Continue = false;
-            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
-            req.Headers.Add(HttpRequestHeader.Authorization, signature);
-            req.Proxy = Core.Config.Proxy;
-            req.Method = "POST";
-            req.ContentType = cType;
-            
-            if (!string.IsNullOrEmpty(postData))
-            {
-                using (Stream stream = req.GetRequestStream())
-                {
-                    byte[] postByte = UTF8Encoding.UTF8.GetBytes(postData);
-                    stream.Write(postByte, 0, postByte.Length);
-                }
-            }
-
-            ResponseResult result = new ResponseResult();
-
-            try
-            {
-                WebResponse res = req.GetResponse();
-                StreamReader reader = new StreamReader(res.GetResponseStream());
-                result.ResponseStream = reader.ReadToEnd();
-                result.Result = StatusResult.Success;
-
-                result.AccessLevel = StringToLevelEnum(res.Headers["x-access-level"]);
-                result.RateLimited = new RateLimited(res.Headers["x-rate-limit-limit"],
-                    res.Headers["x-rate-limit-remaining"], res.Headers["x-rate-limit-reset"]);
-
-                result.Url = res.ResponseUri.ToString();
-
-                res.Close();
-            }
-            catch(WebException ex)
-            {
-                result.Result = GetStatusResult(ex.Status);
-                result.ResponseStream = null;
-                using (StreamReader reader = new StreamReader(ex.Response.GetResponseStream()))
-                {
-                    JObject obj = (JObject)JsonConvert.DeserializeObject(reader.ReadToEnd());
-                    var errors = obj.SelectToken("errors", false);
-                    if (errors != null)
-                    {
-                        if (errors.Type == JTokenType.String)
-                        {
-                            result.Error = new TwitterError();
-                            result.Error.Message = errors.ToString();
-                        }
-                        else if (errors.Type == JTokenType.Array)
-                        {
-                            result.Error = new TwitterError();
-                            result.Error = JsonConvert.DeserializeObject<List<TwitterError>>(errors.ToString())[0];
-                        }
-                        
-                    }
-                }
-                result.AccessLevel = StringToLevelEnum(ex.Response.Headers["x-access-level"]);
-                result.RateLimited = new RateLimited(ex.Response.Headers["x-rate-limit-limit"],
-                    ex.Response.Headers["x-rate-limit-remaining"], ex.Response.Headers["x-rate-limit-reset"]);
-                result.Url = ex.Response.ResponseUri.ToString();
-                
-            }
-			
-            return result;
-        }
-
-
-        public static object UploadPost(string reqUrl, OAuthTokens tokens, byte[] postData, string ContentType, Dictionary<string, string> param = null)
-        {
-            string url = reqUrl;
-            if (param != null) url += ConvertMethod.DictionaryToParams(param);
-
-            /*-------------------- OAuth認証 --------------------*/
-
-            string nonce = Convert.ToBase64String(new ASCIIEncoding().GetBytes(DateTime.Now.Ticks.ToString()));
-            string timestamp = oauth.GenerateTimeStamp();
-            string normalizedUrl, normalizedReqParam;
-
-            string signatureBase = oauth.GenerateSignatureBase(new Uri(url), tokens.ConsumerKey, tokens.AccessToken, tokens.ConsumerSecret,
-                "POST", timestamp, nonce, "HMAC-SHA1", out normalizedUrl, out normalizedReqParam);
-
-            var conpositeKey = string.Concat(Uri.EscapeDataString(tokens.ConsumerSecret),
-                "&", Uri.EscapeDataString(tokens.AccessTokenSecret));
-            string oauth_signature = "";
-            using (HMACSHA1 hasher = new HMACSHA1(UTF8Encoding.UTF8.GetBytes(conpositeKey)))
-            {
-                oauth_signature = Convert.ToBase64String(
-                    hasher.ComputeHash(UTF8Encoding.UTF8.GetBytes(signatureBase)));
-            }
-
-            string signature = "OAuth " + normalizedReqParam;
-            signature = signature.Replace("=", "=\"");
-            signature = signature.Replace("&", "\", ");
-            signature += "\", oauth_signature=\"" + Uri.EscapeDataString(oauth_signature) + "\"";
-
-            /*--------------------  リクエストの作成  --------------------*/
-
-            ServicePointManager.Expect100Continue = false;
-            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
-            req.Headers.Add(HttpRequestHeader.Authorization, signature);
-            req.Proxy = null;
-            req.Method = "POST";
-            req.ContentType = ContentType;
-
-
-            /*--------------------  ストリーム書き込み  --------------------*/
-
-            using (Stream stream = req.GetRequestStream())
-                stream.Write(postData, 0, postData.Length);
-
-            try
-            {
-                return req.GetResponse();
-            }
-            catch (WebException ex)
-            {
-                return ex;
-            }
-        }
+		public static ResponseResult PostText(string reqUrl, OAuthTokens tokens, string data, ParameterClass param)
+		{
+			var req = GenerateWebRequest(reqUrl, WebMethod.POST, tokens, param, null,null, null, null);
+			if (!string.IsNullOrEmpty(data)) req.Headers[HttpRequestHeader.Authorization] += Uri.EscapeDataString("&" + data);
+			System.Windows.Forms.MessageBox.Show(req.Headers[HttpRequestHeader.Authorization]);
+			return GenerateResponseResult(req);
+		}
 
         public static StatusResult GetStatusResult(WebExceptionStatus status)
         {

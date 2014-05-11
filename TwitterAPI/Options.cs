@@ -5,7 +5,7 @@ using System.Text;
 
 namespace TwitterAPI
 {
-    public class StatusUpdateOptions
+    public class StatusUpdateOptions : ParameterClass
     {
         /// <summary>返信先のStatusIdを指定します</summary>
         [Parameters("in_reply_to_status_id")]
@@ -13,7 +13,7 @@ namespace TwitterAPI
 
         /// <summary>緯度</summary>
         [Parameters("lat")]
-        public double Lat { get; set; }
+        public double? Lat { get; set; }
 
         /// <summary>経度</summary>
         [Parameters("long")]

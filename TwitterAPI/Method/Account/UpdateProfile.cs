@@ -13,40 +13,28 @@ namespace TwitterAPI
 
 		public static TwitterResponse<TwitterUser> UpdateProfile(OAuthTokens tokens, UpdateProfileOption option)
 		{
-
-			Dictionary<string, string> dic = new Dictionary<string, string>();
-			if (!string.IsNullOrEmpty(option.Name)) dic.Add("name", option.Name);
-			if (!string.IsNullOrEmpty(option.Url)) dic.Add("url", option.Url);
-			if (!string.IsNullOrEmpty(option.Location)) dic.Add("Location",option.Location);
-			if (!string.IsNullOrEmpty(option.Description)) dic.Add("description", option.Description);
-			if (option.IncludeEntities == true) dic.Add("include_entities", "true");
-			List<string> param = new List<string>();
-			foreach (var d in dic) param.Add(string.Format("{0}={1}", d.Key, d.Value));
-
-			var result = Method.Post(Update_Profile_Url, tokens, "", "application/x-www-form-urlencoded", dic);
-
-			return new TwitterResponse<TwitterUser>(result);
+			return new TwitterResponse<TwitterUser>(Method.Post(Update_Profile_Url, tokens, option, "application/x-www-form-urlencoded", null, null, null));
 		}
 
 		public class UpdateProfileOption : ParameterClass
 		{
-            [Parameters("name","POST")]
+			[Parameters("name", "POST")]
 			public string Name { get; set; }
 
-            [Parameters("url", "POST")]
+			[Parameters("url", "POST")]
 			public string Url { get; set; }
 
-            [Parameters("location", "POST")]
+			[Parameters("location", "POST")]
 			public string Location { get; set; }
 
-            [Parameters("description", "POST")]
+			[Parameters("description", "POST")]
 			public string Description { get; set; }
 
-            [Parameters("include_entities", "POST")]
+			[Parameters("include_entities", "POST")]
 			public bool? IncludeEntities { get; set; }
 
-            [Parameters("skip_status", "POST")]
-            public bool? SkipStatus { get; set; }
-        }
+			[Parameters("skip_status", "POST")]
+			public bool? SkipStatus { get; set; }
+		}
 	}
 }
