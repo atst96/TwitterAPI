@@ -48,8 +48,6 @@ namespace TwitterAPI
 			{
 				string param = parameters.GenerateGetParameters();
 				if (!string.IsNullOrEmpty(param)) addr += param;
-
-				System.Windows.Forms.MessageBox.Show(addr);
 			}
 
 			HttpWebRequest req = null;
@@ -117,7 +115,6 @@ namespace TwitterAPI
 					result.ResponseStream = null;
 					using (StreamReader reader = new StreamReader(ex.Response.GetResponseStream()))
 					{
-						System.Windows.Forms.MessageBox.Show(ex.Response.Headers.ToString());
 						JObject obj = (JObject)JsonConvert.DeserializeObject(reader.ReadToEnd());
 						var errors = obj.SelectToken("errors", false);
 						if (errors != null)
@@ -207,7 +204,6 @@ namespace TwitterAPI
 				result.ResponseStream = null;
 				using (StreamReader reader = new StreamReader(ex.Response.GetResponseStream()))
 				{
-					System.Windows.Forms.MessageBox.Show(ex.Response.Headers.ToString());
 					JObject obj = (JObject)JsonConvert.DeserializeObject(reader.ReadToEnd());
 					var errors = obj.SelectToken("errors", false);
 					if (errors != null)
@@ -244,7 +240,6 @@ namespace TwitterAPI
 		{
 			var req = GenerateWebRequest(reqUrl, WebMethod.POST, tokens, param, null,null, null, null);
 			if (!string.IsNullOrEmpty(data)) req.Headers[HttpRequestHeader.Authorization] += Uri.EscapeDataString("&" + data);
-			System.Windows.Forms.MessageBox.Show(req.Headers[HttpRequestHeader.Authorization]);
 			return GenerateResponseResult(req);
 		}
 

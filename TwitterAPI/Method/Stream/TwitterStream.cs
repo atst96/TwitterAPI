@@ -293,7 +293,7 @@ namespace TwitterAPI
 											{
 												if (targetobject.SelectToken("subscriver_couont", false) != null)
 												{
-													System.Windows.Forms.MessageBox.Show(targetobject.ToString());
+													//System.Windows.Forms.MessageBox.Show(targetobject.ToString());
 													//_targetObject = JsonConvert.DeserializeObject<TwitterStatus>(targetobject.ToString());
 												}
 												else if (targetobject.SelectToken("user", false) != null)
@@ -476,8 +476,6 @@ namespace TwitterAPI
             string signature = "OAuth " + normalizedReqParam;
             signature = signature.Replace("=", "=\"").Replace("&", "\", ");
             signature += "\", oauth_signature=\"" + Uri.EscapeDataString(oauth_signature);
-
-            System.Windows.Forms.MessageBox.Show(signatureBase);
 
             ServicePointManager.Expect100Continue = false;
             HttpWebRequest req = (HttpWebRequest)WebRequest.Create(normalizedUrl);

@@ -355,7 +355,6 @@ namespace TwitterAPI
                             else  response.Result = StatusResult.ParseError;
 
                         } catch(Exception ex) { response.Result = StatusResult.ParseError;
-                        System.Windows.Forms.MessageBox.Show(ex.Message);
                         }
                     }
                 }
@@ -452,7 +451,6 @@ namespace TwitterAPI
                 }
                 catch(Exception ex)
                 {
-                    System.Windows.Forms.MessageBox.Show(ex.Message);
                     try
                     {
                         XmlSerializer serializer = new XmlSerializer(typeof(UpdateImageXmlError));
@@ -549,7 +547,6 @@ namespace TwitterAPI
             catch (WebException ex)
             {
                 StreamReader reader = new StreamReader(ex.Response.GetResponseStream());
-                System.Windows.Forms.MessageBox.Show(reader.ReadToEnd());
                 reader.Dispose();
                 return ex;
             }

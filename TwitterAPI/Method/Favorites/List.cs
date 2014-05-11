@@ -13,7 +13,7 @@ namespace TwitterAPI
 		public static TwitterResponse<TwitterStatus> List(OAuthTokens tokens, FavoritesListOptions options)
 		{
 			var res = Method.Get(Url_Favorites_List, tokens, options);
-			System.Windows.Forms.MessageBox.Show(res.ResponseStream);
+			throw new Exception("未実装");
 			return null;
 		}
 
