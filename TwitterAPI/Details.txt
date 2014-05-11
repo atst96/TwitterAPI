@@ -1,0 +1,22 @@
+﻿
+
+update_with_media.json
+	http://ginpro.winofsql.jp/article/369682592.html
+	http://logicalerror.seesaa.net/article/369559856.html
+	http://blog.livedoor.jp/blackwingcat/archives/1764829.html
+	https://dev.twitter.com/docs/api/1.1/post/statuses/update_with_media
+
+TwitPic
+	http://dev.twitpic.com/docs/2/upload/
+
+img.ly
+	http://img.ly/api
+
+ついっぷるフォト(v2)
+	http://p.twipple.jp/wiki/API_Upload2/ja
+	http://www.ipentec.com/document/document.aspx?page=csharp-use-twitter-api-oauth-library-2011-04&culture=ja-jp
+
+yfrog
+	http://twitter.yfrog.com/page/api
+	http://www.ipentec.com/document/document.aspx?page=csharp-upload-picture-from-yfrog-by-oauth-echo
+	http://code.google.com/p/imageshackapi/wiki/YFrogAPI
