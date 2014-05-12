@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net;
-using System.Web;
-using System.IO;
-
-using System.Threading;
-
-using System.Runtime.Serialization;
-
+﻿using Core;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
-using Core;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Web;
+using TwitterAPI;
 
 namespace TwitterAPI
 {
@@ -29,32 +24,37 @@ namespace TwitterAPI
     public delegate void StreamStoppedCallback(StopRequest status);
     public delegate void StreamAccept(string json);
 
-    public class UserStreamOptions
+    public class UserStreamOptions : ParameterClass
     {
         /// <summary>
         /// Withを設定します
         /// </summary>
-        public WithType With { get; set; }
+		[Parameters("with")]
+        public string With { get; set; }
 
         /// <summary>
         /// Trackを設定します
         /// </summary>
-        public List<string> Track = new List<string>();
+		[Parameters("track")]
+		public TwitterStreamTrackOption Track { get; set; }
 
         /// <summary>
         /// リプライの種類を設定します
         /// </summary>
-        public RepliesType Replies { get; set; }
+		[Parameters("replies")]
+		public RepliesType Replies { get; set; }
 
         /// <summary>
         /// 位置情報を設定します
         /// </summary>
-        public Dictionary<double, double> Location { get; set; }
+		[Parameters("locations")]
+		public TwitterLocationProperty Location { get; set; }
 
         /// <summary>
         /// stringify_friends_idsを設定します
         /// </summary>
-        public bool StringifyFriendsIds { get; set; }
+		[Parameters("stringify_friends_ids")]
+        public bool? StringifyFriendsIds { get; set; }
     }
 
     public class FilterStreamOptions
@@ -99,32 +99,6 @@ namespace TwitterAPI
                 this.tokens = tokens;
                 if (string.IsNullOrWhiteSpace(userAgent)) this.UserAgent = "TwitterAPI";
                 else this.UserAgent = userAgent;
-        }
-
-        public Dictionary<string,string> StreamOptionsToDictionary(UserStreamOptions options)
-        {
-            Dictionary<string,string> result = new Dictionary<string,string>();
-
-            if (options.With != null)
-            {
-                switch (options.With)
-                {
-                    case WithType.User:
-                        result.Add("with", "user");
-                        break;
-                    case WithType.Followings:
-                        result.Add("with", "followings");
-                        break;
-                }
-            }
-
-            if (options.Track != null)
-            {
-                for(int i=0;i<options.Track.Count;i++) options.Track[i] = Method.UrlEncode(options.Track[i]);
-                result.Add("track", string.Join(",", options.Track.ToArray()));
-            }
-
-            return result;
         }
 
         public Dictionary<string, string> FilterStreamOptionsToDiecionary(FilterStreamOptions options)
@@ -180,7 +154,7 @@ namespace TwitterAPI
         /// <param name="eventCallback"></param>
         /// <param name="directMessageCreatedCallback"></param>
         /// <param name="directMessageDeletedCallback"></param>
-        public IAsyncResult StartUserStream(
+        public IAsyncResult StartUserStream(UserStreamOptions option,
             InitUserStreamCallback friendCallback, StreamStoppedCallback streamStoppedCallback,
             StatusCreatedCallback statusCreatedCallback, StatusDeletedCallback statusDeletedCallback,
             EventCallback eventCallback, DirectMessageCreatedCallback directMessageCreatedCallback,
@@ -194,7 +168,9 @@ namespace TwitterAPI
             this.directMessageCreatedCallback = directMessageCreatedCallback;
             this.directMessageDeletedCallback = directMessageDeletedCallback;
 
-            request = GetRequest(UrlBank.STREAMING_USER, tokens, UserAgent);
+			request = Method.GenerateWebRequest(UrlBank.STREAMING_USER, WebMethod.GET, tokens, option, null, null, null, null);
+			request.UserAgent = UserAgent;
+
             StreamStop = false;
             return request.BeginGetResponse(StreamCallback, request);
         }

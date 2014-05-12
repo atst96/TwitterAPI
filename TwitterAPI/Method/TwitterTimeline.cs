@@ -24,17 +24,52 @@ namespace TwitterAPI
 
         private static TwitterResponse<TwitterStatusCollection> GetTimeline(string Url, OAuthTokens tokens, TimelineOptions options = null)
         {
-            if (string.IsNullOrEmpty(Url)) throw new ArgumentNullException("Url");
-            else if (tokens == null) throw new ArgumentNullException("Tokens");
-            else
-            {
-                ResponseResult result;
-                if (options != null) result = Method.Get(Url, tokens, options);
-                else result = Method.Get(UrlBank.HOME_TIMELINE, tokens);
-
-                return new TwitterResponse<TwitterStatusCollection>(result);
-            }
+                return new TwitterResponse<TwitterStatusCollection>(Method.Get(Url, tokens, options));
         }
+
+		/// <summary>
+		/// UserTimelineの取得
+		/// </summary>
+		/// <param name="tokens">OAuthTokens</param>
+		/// <param name="options">TimelineOptions</param>
+		/// <returns>TwitterStatusCollection</returns>
+		public static TwitterResponse<TwitterStatusCollection> UserTimeline(OAuthTokens tokens, TimelineOptions options = null)
+		{
+			return GetTimeline(Url_User_Timeline, tokens, options);
+		}
+
+		/// <summary>
+		/// MentionsTimelineの取得
+		/// </summary>
+		/// <param name="tokens">OAuthTokens</param>
+		/// <param name="options">TimelineOptions</param>
+		/// <returns>TwitterStatusCollection</returns>
+		public static TwitterResponse<TwitterStatusCollection> RetweetOfMe(OAuthTokens tokens, TimelineOptions options = null)
+		{
+			return GetTimeline(Url_Retweet_Of_Me, tokens, options);
+		}
+
+		/// <summary>
+		/// MentionsTimelineの取得
+		/// </summary>
+		/// <param name="tokens">OAuthTokens</param>
+		/// <param name="options">TimelineOptions</param>
+		/// <returns>TwitterStatusCollection</returns>
+		public static TwitterResponse<TwitterStatusCollection> MentionsTimeline(OAuthTokens tokens, TimelineOptions options = null)
+		{
+			return GetTimeline(Url_Mentions_Timeline, tokens, options);
+		}
+
+		/// <summary>
+		/// HomeTimelineの取得
+		/// </summary>
+		/// <param name="tokens">OAuthTokens</param>
+		/// <param name="options">TimelineOptions</param>
+		/// <returns>TwitterStatusCollection</returns>
+		public static TwitterResponse<TwitterStatusCollection> HomeTimeline(OAuthTokens tokens, TimelineOptions options = null)
+		{
+			return GetTimeline(Url_Home_Timeline, tokens, options);
+		}
 
 
         public class TimelineOptions : ParameterClass

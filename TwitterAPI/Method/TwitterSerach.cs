@@ -13,16 +13,9 @@ namespace TwitterAPI
     {
         private static string Url_Serach_Tweets = "https://api.twitter.com/1.1/search/tweets.json";
 
-        public static TwitterResponse<TwitterSearchCollection> Search(OAuthTokens tokens)
-        {
-            return Search(tokens);
-        }
-
         public static TwitterResponse<TwitterSearchCollection> Search(OAuthTokens tokens, TwitterSearchOptions Options = null)
         {
-            ResponseResult result = Method.Get(Url_Serach_Tweets, tokens, Options);
-
-            return new TwitterResponse<TwitterSearchCollection>(result);
+            return new TwitterResponse<TwitterSearchCollection>(Method.Get(Url_Serach_Tweets, tokens, Options));
         }
 
         /// <summary>

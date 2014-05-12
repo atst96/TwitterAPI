@@ -23,6 +23,29 @@ namespace TwitterAPI
 		GET,
 	}
 
+	public class TwitterLocationProperty : List<double>
+	{
+		public TwitterLocationProperty(double Lat, double Long)
+		{
+			this.Add(Lat); this.Add(Long);
+		}
+
+		public override string ToString()
+		{
+			return string.Join(",", this.ToArray());
+		}
+	}
+
+	public class TwitterStreamTrackOption : List<string>
+	{
+		public override string ToString()
+		{
+			for (int i = 0; i < this.Count; i++)
+				this[i] = Method.UrlEncode(this[i]);
+			return string.Join(",", this.ToArray());
+		}
+	}
+
     public abstract class Method
     {
         private static OAuthBase oauth = new OAuthBase();

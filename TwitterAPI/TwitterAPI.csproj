@@ -102,11 +102,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LanguageTools.cs" />
-    <Compile Include="Method\Account\TwitterAccount.cs" />
-    <Compile Include="Method\Account\UpdateProfile.cs" />
-    <Compile Include="Method\Account\VerifyCredentials.cs" />
+    <Compile Include="Method\TwitterAccount.cs" />
     <Compile Include="Collection.cs" />
-    <Compile Include="Method\Account\Show.cs" />
     <Compile Include="Method\DirectMessages\DirectMessage.cs" />
     <Compile Include="Method\DirectMessages\DirectMessageCommand.cs" />
     <Compile Include="Core\ITwitterObject.cs" />
@@ -116,24 +113,19 @@
     <Compile Include="Core\UrlBank.cs" />
     <Compile Include="Method\Favorites\Favorites.cs" />
     <Compile Include="Method\Favorites\List.cs" />
-    <Compile Include="Method\Friends\FollowersList.cs" />
-    <Compile Include="Method\Friends\TwitterFriends.cs" />
+    <Compile Include="Method\TwitterFriends.cs" />
     <Compile Include="Method\Method.cs" />
-    <Compile Include="Method\Timelines\MentionsTimeline.cs" />
-    <Compile Include="Method\Trends\TwitterTrends.cs" />
+    <Compile Include="Method\TwitterTrends.cs" />
     <Compile Include="Method\Tweets\TwitterStatusCommand.cs" />
     <Compile Include="Method\Tweets\UpdateImage.cs" />
     <Compile Include="OAuthUtility\OAuth.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Method\Tweets\TwitterStatus.cs" />
-    <Compile Include="Method\Timelines\HomeTimeline.cs" />
-    <Compile Include="Method\Timelines\RetweetOfMe.cs" />
-    <Compile Include="Method\Timelines\UserTimeline.cs" />
-    <Compile Include="Method\Stream\TwitterStream.cs" />
+    <Compile Include="Method\TwitterStream.cs" />
     <Compile Include="TwitterResponse.cs" />
-    <Compile Include="Method\Timelines\TwitterTimeline.cs" />
-    <Compile Include="Method\Search\TwitterSerach.cs" />
+    <Compile Include="Method\TwitterTimeline.cs" />
+    <Compile Include="Method\TwitterSerach.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Details.txt" />
