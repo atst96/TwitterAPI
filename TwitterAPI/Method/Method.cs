@@ -58,10 +58,10 @@ namespace TwitterAPI
         /// <returns>RequestResult</returns>
         public static ResponseResult Get(string url, OAuthTokens tokens, ParameterClass param = null)
         {
-			return GenerateResponseResult(GenerateWebRequest(url, WebMethod.GET, tokens, param, null, null, null, null));
+			return GenerateResponseResult(GenerateWebRequest(url, WebMethod.GET, tokens, param, null, null, null));
         }
 
-		public static HttpWebRequest GenerateWebRequest(string url, WebMethod method,OAuthTokens tokens, ParameterClass parameters,string contentType, string postHeader, byte[] data, WebProxy proxy)
+		public static HttpWebRequest GenerateWebRequest(string url, WebMethod method,OAuthTokens tokens, ParameterClass parameters,string contentType, string postHeader, byte[] data)
 		{
 			OAuthBase oauth = new OAuthBase();
 
@@ -254,14 +254,14 @@ namespace TwitterAPI
 			return result;
 		}
 
-		public static ResponseResult Post(string url, OAuthTokens tokens, ParameterClass parameters, string contentType, string postHeader, byte[] data, WebProxy proxy)
+		public static ResponseResult Post(string url, OAuthTokens tokens, ParameterClass parameters, string contentType, string postHeader, byte[] data)
 		{
-			return GenerateResponseResult(GenerateWebRequest(url, WebMethod.POST, tokens, parameters, contentType, postHeader, data, proxy));
+			return GenerateResponseResult(GenerateWebRequest(url, WebMethod.POST, tokens, parameters, contentType, postHeader, data));
 		}
 
 		public static ResponseResult PostText(string reqUrl, OAuthTokens tokens, string data, ParameterClass param)
 		{
-			var req = GenerateWebRequest(reqUrl, WebMethod.POST, tokens, param, null,null, null, null);
+			var req = GenerateWebRequest(reqUrl, WebMethod.POST, tokens, param, null,null, null);
 			if (!string.IsNullOrEmpty(data)) req.Headers[HttpRequestHeader.Authorization] += Uri.EscapeDataString("&" + data);
 			return GenerateResponseResult(req);
 		}

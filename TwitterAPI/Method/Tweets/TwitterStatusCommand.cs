@@ -31,7 +31,7 @@ namespace TwitterAPI
             string url = StatusUpdateUrl;
 
 			string data = "status=" + Method.UrlEncode(tweet);
-			return new TwitterResponse<TwitterStatus>(Method.GenerateResponseResult(Method.GenerateWebRequest(url, WebMethod.POST, tokens, options, "application/x-www-form-urlencoded", data, UTF8Encoding.UTF8.GetBytes(data), null)));
+			return new TwitterResponse<TwitterStatus>(Method.GenerateResponseResult(Method.GenerateWebRequest(url, WebMethod.POST, tokens, options, "application/x-www-form-urlencoded", data, UTF8Encoding.UTF8.GetBytes(data))));
         }
 
 		/// <summary>
@@ -82,7 +82,7 @@ namespace TwitterAPI
 			builder.AppendLine(fileData);
 			builder.AppendLine(footer);
 
-			return new TwitterResponse<TwitterStatus>(Method.GenerateResponseResult(Method.GenerateWebRequest(url, WebMethod.POST, tokens, options, ContentType, null, encoding.GetBytes(builder.ToString()), null)));
+			return new TwitterResponse<TwitterStatus>(Method.GenerateResponseResult(Method.GenerateWebRequest(url, WebMethod.POST, tokens, options, ContentType, null, encoding.GetBytes(builder.ToString()))));
 		}
 
 
@@ -96,7 +96,7 @@ namespace TwitterAPI
         {
             if (tokens == null) throw new ArgumentNullException("Tokens");
 
-            return new TwitterResponse<TwitterStatus>(Method.Post(string.Format("https://api.twitter.com/1.1/statuses/destroy/{0}.json", Id), tokens, null, null, null, null, null));
+            return new TwitterResponse<TwitterStatus>(Method.Post(string.Format("https://api.twitter.com/1.1/statuses/destroy/{0}.json", Id), tokens, null, null, null, null));
         }
 
 
@@ -109,7 +109,7 @@ namespace TwitterAPI
 		{
 			if (id < 1) throw new ArgumentNullException("Id");
 
-			return new TwitterResponse<TwitterStatus>(Method.Post(string.Format(RetweetUrl, id), tokens, null, null, null, null, null));
+			return new TwitterResponse<TwitterStatus>(Method.Post(string.Format(RetweetUrl, id), tokens, null, null, null, null));
 		}
 
 
@@ -122,7 +122,7 @@ namespace TwitterAPI
         {
             if (id < 1) throw new ArgumentNullException("Id");
 
-			return new TwitterResponse<TwitterStatus>(Method.Post(string.Format(DestroyRetweetUrl, id), tokens, null, null, null, null, null));
+			return new TwitterResponse<TwitterStatus>(Method.Post(string.Format(DestroyRetweetUrl, id), tokens, null, null, null, null));
         }
     }
 }

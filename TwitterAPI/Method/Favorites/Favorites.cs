@@ -17,7 +17,7 @@ namespace TwitterAPI
 			dic.Add("id", Id.ToString());
 			if (IncludeEntities == true) dic.Add("include_entities", IncludeEntities.ToString());
 
-			var result = Method.Post(UrlBank.FAVORITES_CREATE, tokens, new favParam { Id = Id, IncludeEntities = IncludeEntities }, null, null, null, null);
+			var result = Method.Post(UrlBank.FAVORITES_CREATE, tokens, new favParam { Id = Id, IncludeEntities = IncludeEntities }, null, null, null);
 
 			return new TwitterResponse<TwitterStatus>(result);
 		}

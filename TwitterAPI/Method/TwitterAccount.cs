@@ -22,7 +22,7 @@ namespace TwitterAPI
 
 		public static TwitterResponse<TwitterUser> UpdateProfile(OAuthTokens tokens, UpdateProfileOption option)
 		{
-			return new TwitterResponse<TwitterUser>(Method.Post(Update_Profile_Url, tokens, option, "application/x-www-form-urlencoded", null, null, null));
+			return new TwitterResponse<TwitterUser>(Method.Post(Update_Profile_Url, tokens, option, "application/x-www-form-urlencoded", null, null));
 		}
 
 		public static TwitterResponse<TwitterUser> Show(OAuthTokens tokens, UsersShowOption option)

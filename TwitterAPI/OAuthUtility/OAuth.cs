@@ -66,7 +66,6 @@ namespace TwitterAPI
 				+ "&oauth_signature=" + Method.UrlEncode(signature);
 
 			HttpWebRequest req = WebRequest.Create(reqTokenUrl) as HttpWebRequest;
-			req.Proxy = Core.Config.Proxy;
 
 			try
 			{
@@ -116,7 +115,6 @@ namespace TwitterAPI
             {
                 // レスポンスの取得
                 WebRequest req = WebRequest.Create(accessTokenUrl);
-                req.Proxy = Core.Config.Proxy;
                 WebResponse res = req.GetResponse();
                 StreamReader sr = new StreamReader(res.GetResponseStream(), Encoding.GetEncoding("Shift_JIS"));
 

@@ -168,7 +168,7 @@ namespace TwitterAPI
             this.directMessageCreatedCallback = directMessageCreatedCallback;
             this.directMessageDeletedCallback = directMessageDeletedCallback;
 
-			request = Method.GenerateWebRequest(UrlBank.STREAMING_USER, WebMethod.GET, tokens, option, null, null, null, null);
+			request = Method.GenerateWebRequest(UrlBank.STREAMING_USER, WebMethod.GET, tokens, option, null, null, null);
 			request.UserAgent = UserAgent;
 
             StreamStop = false;
