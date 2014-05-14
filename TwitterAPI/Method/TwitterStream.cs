@@ -38,6 +38,12 @@ namespace TwitterAPI
 		[Parameters("track")]
 		public TwitterStreamTrackOption Track { get; set; }
 
+		/// <summary>
+		/// フォローユーザーの活動状況をリアルタイムに取得します。
+		/// </summary>
+		[Parameters("include_followings_activity")]
+		public bool? IncludeFollowingsActivity { get; set; }
+
         /// <summary>
         /// リプライの種類を設定します
         /// </summary>
@@ -231,6 +237,7 @@ namespace TwitterAPI
 								{
 									if (!StreamStop && !string.IsNullOrEmpty(data))
 									{
+										System.Diagnostics.Debug.WriteLine(data);
 
 										JObject obj = (JObject)JsonConvert.DeserializeObject(data);
 
@@ -251,7 +258,6 @@ namespace TwitterAPI
 											{
 												if (statusDeletedCallback != null && deletedStatus.HasValues)
 												{
-													System.Diagnostics.Debug.WriteLine(data);
 													statusDeletedCallback(JsonConvert.DeserializeObject<TwitterDeletedStatus>(deletedStatus.ToString()));
 												}
 											}
@@ -263,8 +269,11 @@ namespace TwitterAPI
 										var events = obj.SelectToken("event", false);
 										if (eventCallback != null && events != null)
 										{
+											System.Diagnostics.Debug.WriteLine(events.ToString());
+
 											var targetobject = obj.SelectToken("target_object", false);
 											TwitterStatus _targetObject = null;
+											TwitterListInfo listObject = null;
 											if (targetobject != null)
 											{
 												if (targetobject.SelectToken("subscriver_couont", false) != null)
@@ -272,12 +281,17 @@ namespace TwitterAPI
 													//System.Windows.Forms.MessageBox.Show(targetobject.ToString());
 													//_targetObject = JsonConvert.DeserializeObject<TwitterStatus>(targetobject.ToString());
 												}
+												else if (events.ToString().Contains("list_"))
+												{
+													listObject = JsonConvert.DeserializeObject<TwitterListInfo>(targetobject.ToString());
+												}
 												else if (targetobject.SelectToken("user", false) != null)
 												{
 													_targetObject = JsonConvert.DeserializeObject<TwitterStatus>(targetobject.ToString());
 												}
 												var endevent = JsonConvert.DeserializeObject<StreamEventStatus>(obj.ToString());
 												endevent.TargetObject = _targetObject;
+												endevent.TargetObject_List = listObject;
 												this.eventCallback(endevent);
 											}
 										}

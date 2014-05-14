@@ -232,13 +232,16 @@ namespace TwitterAPI
         public TwitterUser Target { get; set; }
         public TwitterUser Source { get; set; }
         public TwitterStatus TargetObject { get; set; }
+		public TwitterListInfo TargetObject_List { get; set; }
 
         [JsonProperty(PropertyName = "event")]
         [JsonConverter(typeof(StringEnumConverter))]
         public StreamEventType EventType { get; set; }
 
-        [JsonProperty(PropertyName = "created_at")]
-        public string CreatedAt { get; set; }
+		[JsonProperty(PropertyName = "created_at")]
+		private string created_at { get; set; }
+
+		public DateTime CreateDate { get { return DateTime.ParseExact(created_at, "ddd MMM dd HH':'mm':'ss zz'00' yyyy", System.Globalization.DateTimeFormatInfo.InvariantInfo, System.Globalization.DateTimeStyles.None); } }
     }
 
 
@@ -453,8 +456,10 @@ namespace TwitterAPI
         [DataMember(Name = "as_of")]
         public string AsOf { get; set; }
 
-        [DataMember(Name = "created_at")]
-        public string CreateDate { get; set; }
+		[DataMember(Name = "created_at")]
+		private string created_at { get; set; }
+
+		public DateTime CreateDate { get { return DateTime.ParseExact(created_at, "ddd MMM dd HH':'mm':'ss zz'00' yyyy", System.Globalization.DateTimeFormatInfo.InvariantInfo, System.Globalization.DateTimeStyles.None); } }
 
         [DataMember(Name = "trends")]
         public List<TwitterTrend> Trends { get; set; }
@@ -462,4 +467,49 @@ namespace TwitterAPI
         [DataMember(Name = "locations")]
         public List<TwitterTrendLocations> Locations { get; set; }
     }
+
+	[DataContract]
+	public class TwitterListInfo
+	{
+		[DataMember(Name = "created_at")]
+		private string created_at { get; set; }
+
+		public DateTime CreateDate { get { return DateTime.ParseExact(created_at, "ddd MMM dd HH':'mm':'ss zz'00' yyyy", System.Globalization.DateTimeFormatInfo.InvariantInfo, System.Globalization.DateTimeStyles.None); } }
+
+		[DataMember(Name = "description")]
+		public string Description { get; set; }
+
+		[DataMember(Name = "following")]
+		public bool Following { get; set; }
+
+		[DataMember(Name = "full_name")]
+		public string FullName { get; set; }
+
+		[DataMember(Name = "id")]
+		public decimal Id { get; set; }
+
+		[DataMember(Name = "id_str")]
+		public string StringId { get; set; }
+
+		[DataMember(Name = "member_count")]
+		public int CountOfMembers { get; set; }
+
+		[DataMember(Name = "Mode")]
+		public string Mode { get; set; }
+
+		[DataMember(Name = "name")]
+		public string Name { get; set; }
+
+		[DataMember(Name = "slug")]
+		public string Slug { get; set; }
+
+		[DataMember(Name = "subscriver_count")]
+		public int CountOfSubscriver { get; set; }
+
+		[DataMember(Name = "uri")]
+		public string Uri { get; set; }
+
+		[DataMember(Name = "user")]
+		public TwitterUser User { get; set; }
+	}
 }
