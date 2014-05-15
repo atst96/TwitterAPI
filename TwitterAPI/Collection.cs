@@ -64,7 +64,7 @@ namespace TwitterAPI
         public int FriendsCount { get; set; }
 
         [DataMember(Name = "listed_count")]
-        public int ListedCount { get; set; }
+        public int? ListedCount { get; set; }
 
         [DataMember(Name = "created_at")]
         private string created_at { get; set; }
@@ -227,21 +227,31 @@ namespace TwitterAPI
         public List<decimal> Friends { get; set; }
     }
 
+	[DataContract]
     public class StreamEventStatus
     {
+		[DataMember(Name = "event")]
+        public StreamEventType EventType { get; set; }
+
+		[DataMember(Name = "source")]
+		public TwitterUser Source { get; set; }
+
+		[DataMember(Name = "target")]
         public TwitterUser Target { get; set; }
-        public TwitterUser Source { get; set; }
+
         public TwitterStatus TargetObject { get; set; }
 		public TwitterListInfo TargetObject_List { get; set; }
 
-        [JsonProperty(PropertyName = "event")]
-        [JsonConverter(typeof(StringEnumConverter))]
-        public StreamEventType EventType { get; set; }
-
-		[JsonProperty(PropertyName = "created_at")]
+		[DataMember(Name = "created_at")]
 		private string created_at { get; set; }
 
-		public DateTime CreateDate { get { return DateTime.ParseExact(created_at, "ddd MMM dd HH':'mm':'ss zz'00' yyyy", System.Globalization.DateTimeFormatInfo.InvariantInfo, System.Globalization.DateTimeStyles.None); } }
+		public DateTime CreateDate
+		{
+			get
+			{
+				return DateTime.ParseExact(created_at, "ddd MMM dd HH':'mm':'ss zz'00' yyyy", System.Globalization.DateTimeFormatInfo.InvariantInfo, System.Globalization.DateTimeStyles.None);
+			}
+		}
     }
 
 
@@ -332,55 +342,56 @@ namespace TwitterAPI
         public string MediaUrl { get; set; }
     }
 
-
+	[DataContract]
+	[JsonConverter(typeof(StringEnumConverter))]
     public enum StreamEventType
     {
         Unknown,
 
-        [EnumMemberAttribute(Value = "block")]
+        [EnumMember(Value = "block")]
         Block,
 
-        [EnumMemberAttribute(Value = "unblock")]
+		[EnumMember(Value = "unblock")]
         UnBlock,
 
-        [EnumMemberAttribute(Value = "favorite")]
+		[EnumMember(Value = "favorite")]
         Favorite,
 
-        [EnumMemberAttribute(Value = "unfavorite")]
+		[EnumMember(Value = "unfavorite")]
         UnFavorite,
 
-        [EnumMemberAttribute(Value = "follow")]
+		[EnumMember(Value = "follow")]
         Follow,
 
-        [EnumMemberAttribute(Value = "unfollow")]
+		[EnumMember(Value = "unfollow")]
         UnFollow,
 
-        [EnumMemberAttribute(Value = "list_member_added")]
+		[EnumMember(Value = "list_member_added")]
         ListMemberAdded,
 
-        [EnumMemberAttribute(Value = "list_member_removed")]
+		[EnumMember(Value = "list_member_removed")]
         ListMemberRemoved,
 
-        [EnumMemberAttribute(Value = "list_user_subscribed")]
+		[EnumMember(Value = "list_user_subscribed")]
         ListUserSubscribed,
 
-        [EnumMemberAttribute(Value = "list_user_unsubscribed")]
+		[EnumMember(Value = "list_user_unsubscribed")]
         ListUserUnsubscribed,
 
-        [EnumMemberAttribute(Value = "list_created")]
+		[EnumMember(Value = "list_created")]
         ListCreated,
 
-        [EnumMemberAttribute(Value = "list_updated")]
+		[EnumMember(Value = "list_updated")]
         ListUpdated,
 
-        [EnumMemberAttribute(Value = "list_destroyed")]
+		[EnumMember(Value = "list_destroyed")]
         ListDestroyed,
 
-        [EnumMemberAttribute(Value = "user_update")]
+		[EnumMember(Value = "user_update")]
         UserUpdated,
 
-        [EnumMemberAttribute(Value = "access_revoked")]
-        AccessRevoked
+		[EnumMember(Value = "access_revoked")]
+        AccessRevoked,
     }
 
     [DataContract]

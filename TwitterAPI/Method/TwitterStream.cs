@@ -266,34 +266,46 @@ namespace TwitterAPI
 
 										}
 
-										var events = obj.SelectToken("event", false);
-										if (eventCallback != null && events != null)
-										{
-											System.Diagnostics.Debug.WriteLine(events.ToString());
 
-											var targetobject = obj.SelectToken("target_object", false);
-											TwitterStatus _targetObject = null;
-											TwitterListInfo listObject = null;
-											if (targetobject != null)
+										try
+										{
+											var events = obj.SelectToken("event", false);
+											if (eventCallback != null && events != null)
 											{
-												if (targetobject.SelectToken("subscriver_couont", false) != null)
+												var _event = JsonConvert.DeserializeObject<StreamEventStatus>(data);
+
+												var targetobject = obj.SelectToken("target_object", false);
+
+												TwitterStatus _targetObject = null;
+												TwitterListInfo listObject = null;
+
+												if (targetobject != null)
 												{
-													//System.Windows.Forms.MessageBox.Show(targetobject.ToString());
-													//_targetObject = JsonConvert.DeserializeObject<TwitterStatus>(targetobject.ToString());
+
+													if (targetobject.SelectToken("subscriver_couont", false) != null)
+													{
+														//System.Windows.Forms.MessageBox.Show(targetobject.ToString());
+														//_targetObject = JsonConvert.DeserializeObject<TwitterStatus>(targetobject.ToString());
+													}
+													else if (events.ToString().Contains("list_"))
+													{
+														listObject = JsonConvert.DeserializeObject<TwitterListInfo>(targetobject.ToString());
+													}
+													else if (targetobject.SelectToken("user", false) != null)
+													{
+														_targetObject = JsonConvert.DeserializeObject<TwitterStatus>(targetobject.ToString());
+													}
+
 												}
-												else if (events.ToString().Contains("list_"))
-												{
-													listObject = JsonConvert.DeserializeObject<TwitterListInfo>(targetobject.ToString());
-												}
-												else if (targetobject.SelectToken("user", false) != null)
-												{
-													_targetObject = JsonConvert.DeserializeObject<TwitterStatus>(targetobject.ToString());
-												}
-												var endevent = JsonConvert.DeserializeObject<StreamEventStatus>(obj.ToString());
-												endevent.TargetObject = _targetObject;
-												endevent.TargetObject_List = listObject;
-												this.eventCallback(endevent);
+
+												_event.TargetObject = _targetObject;
+												_event.TargetObject_List = listObject;
+												this.eventCallback(_event);
 											}
+										}
+										catch (Exception ex)
+										{
+											System.Diagnostics.Debug.WriteLine(ex);
 										}
 
 										var user = obj.SelectToken("user", false);
@@ -321,8 +333,8 @@ namespace TwitterAPI
                             reader.Close();
                             OnStreamStopped(StreamStop ? StopRequest.StoppedByRequest : StopRequest.WebConnectionFailed);
                         }
-                        catch (Exception)
-                        {
+                        catch (Exception ex)
+						{
                             reader.Close();
                             OnStreamStopped(StreamStop ? StopRequest.StoppedByRequest : StopRequest.WebConnectionFailed);
                         }
