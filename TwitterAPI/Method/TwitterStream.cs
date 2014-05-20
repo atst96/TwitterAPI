@@ -277,7 +277,7 @@ namespace TwitterAPI
 												var targetobject = obj.SelectToken("target_object", false);
 
 												TwitterStatus _targetObject = null;
-												TwitterListInfo listObject = null;
+												TwitterList listObject = null;
 
 												if (targetobject != null)
 												{
@@ -289,7 +289,7 @@ namespace TwitterAPI
 													}
 													else if (events.ToString().Contains("list_"))
 													{
-														listObject = JsonConvert.DeserializeObject<TwitterListInfo>(targetobject.ToString());
+														listObject = JsonConvert.DeserializeObject<TwitterList>(targetobject.ToString());
 													}
 													else if (targetobject.SelectToken("user", false) != null)
 													{

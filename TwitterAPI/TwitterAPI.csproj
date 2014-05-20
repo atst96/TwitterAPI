@@ -102,6 +102,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LanguageTools.cs" />
+    <Compile Include="Method\Lists\TwitterLists.cs" />
     <Compile Include="Method\TwitterAccount.cs" />
     <Compile Include="Collection.cs" />
     <Compile Include="Method\DirectMessages\DirectMessage.cs" />

@@ -7,6 +7,8 @@ using System.Web;
 using System.Net;
 using System.IO;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace TwitterAPI
 {
@@ -87,6 +89,38 @@ namespace TwitterAPI
 				throw ex;*/
 				return null;
 			}
+		}
+
+		public static TwitterResponse<string> GetBearer(string consumerKey, string consumerSecret)
+		{
+			string url = "https://api.twitter.com/oauth2/token";
+
+			string token_credential = string.Format("{0}:{1}",
+				HttpUtility.UrlEncode(consumerKey), HttpUtility.UrlEncode(consumerSecret));
+			string credentail = "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(token_credential));
+
+			byte[] data = Encoding.UTF8.GetBytes("grant_type=client_credentials");
+
+			HttpWebRequest req = WebRequest.Create(url) as HttpWebRequest;
+			req.Proxy = null;
+			req.Method = "POST";
+			req.Headers.Add("Authorization", credentail);
+			req.ContentType = "application/x-www-form-urlencoded;charset=UTF-8";
+			req.ContentLength = data.Length;
+
+			using (Stream stream = req.GetRequestStream())
+				stream.Write(data, 0, data.Length);
+
+			var res = new TwitterResponse<string>(Method.GenerateResponseResult(req), false);
+
+			if (res.Result == StatusResult.Success)
+			{
+				var json = JsonConvert.DeserializeObject(res.ToString());
+				if (((JObject)json).SelectToken("token_type", false) != null)
+					if (((JObject)json).SelectToken("token_type", false).ToString().ToLower() == "bearer")
+					res.ResponseObject = ((JObject)json).SelectToken("access_token").ToString();
+			}
+			return res;
 		}
 
         /// <summary>

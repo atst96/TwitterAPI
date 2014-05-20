@@ -136,6 +136,7 @@ namespace TwitterAPI
 
 					result.Result = GetStatusResult(ex.Status);
 					result.ResponseStream = null;
+
 					using (StreamReader reader = new StreamReader(ex.Response.GetResponseStream()))
 					{
 						JObject obj = (JObject)JsonConvert.DeserializeObject(reader.ReadToEnd());
@@ -155,6 +156,7 @@ namespace TwitterAPI
 
 						}
 					}
+					
 					result.AccessLevel = WebHeaderToAccessLevel(ex.Response.Headers);
 					result.RateLimited = new RateLimited(ex.Response.Headers[XRateLimitLimit], ex.Response.Headers[XRateLimitRemaining], ex.Response.Headers[XRateLimitRemaining]);
 					result.Url = ex.Response.ResponseUri.ToString();
