@@ -30,16 +30,10 @@ namespace TwitterAPI
 
     public partial class OAuthUtility
     {
-        private static UrlBank urlBank = new UrlBank();
-
         private static OAuthBase oauth = new OAuthBase();
 
         private static string timestamp;
         private static string nonce;
-
-		private static readonly string REQUEST_TOKNE_URL = "https://api.twitter.com/oauth/request_token";
-		private static readonly string AUTHORIZE_URL = "https://api.twitter.com/oauth/authorize";
-		private static readonly string ACCESS_TOKEN_URL = "https://api.twitter.com/oauth/access_token";
 
 		/// <summary>
 		/// 認証用URLの取得
@@ -57,7 +51,7 @@ namespace TwitterAPI
 
 			string normalizedUrl, normalizedReqParam;
 
-			Uri reqUrl = new Uri(REQUEST_TOKNE_URL);
+			var reqUrl = new Uri(UrlBank.OAuthRequestToken);
 
 			// シグネチャを生成
 			string signature = oauth.GenerateSignature(reqUrl,
@@ -67,15 +61,15 @@ namespace TwitterAPI
 			string reqTokenUrl = normalizedUrl + "?" + normalizedReqParam
 				+ "&oauth_signature=" + Method.UrlEncode(signature);
 
-			HttpWebRequest req = WebRequest.Create(reqTokenUrl) as HttpWebRequest;
+			var req = WebRequest.Create(reqTokenUrl) as HttpWebRequest;
 
 			try
 			{
-				WebResponse res = req.GetResponse();
-				StreamReader reader = new StreamReader(res.GetResponseStream());
+				var res = req.GetResponse();
+				var reader = new StreamReader(res.GetResponseStream());
 
 				string str = reader.ReadToEnd();
-				OAuthTokenClass token = new OAuthTokenClass(str);
+				var token = new OAuthTokenClass(str);
 
 				res.Close(); reader.Close();
 
@@ -137,13 +131,13 @@ namespace TwitterAPI
             string normalizedUrl, normalizedReqParam;
 
             // シグネチャを生成
-            string signature = oauth.GenerateSignature(new Uri(REQUEST_TOKNE_URL),
+            string signature = oauth.GenerateSignature(new Uri(UrlBank.OAuthRequestToken),
                 ConsumerKey, ConsumerSecret, Token, TokenSecret, "GET", timestamp, nonce,
                 OAuthBase.SignatureTypes.HMACSHA1, out normalizedUrl, out normalizedReqParam);
 
             // AccessToken用のURLを生成
             string accessTokenUrl = string.Format("{0}?{1}&oauth_signature={2}&oauth_verifier={3}",
-                ACCESS_TOKEN_URL, normalizedReqParam, UrlEncode(signature), Verifier);
+                UrlBank.OAuthAccessToken, normalizedReqParam, UrlEncode(signature), Verifier);
 
             try
             {
@@ -189,7 +183,7 @@ namespace TwitterAPI
                     OAuthTokenSecret = Regex.Replace(RequestToken, TokenPattern, "$2");
                     if (Regex.Replace(RequestToken, TokenPattern, "$3") == "true") OAuthCallbackConfirmed = true;
                     else OAuthCallbackConfirmed = false;
-                    RequestUrl = string.Format(UrlBank.PATTERN_AUTHORIZE, OAuthToken, OAuthTokenSecret);
+                    RequestUrl = string.Format("{0}?oauth_token={1}&oauth_token_secret={2}", UrlBank.OAuthAuthorize, OAuthToken, OAuthTokenSecret);
                 }
             }
 

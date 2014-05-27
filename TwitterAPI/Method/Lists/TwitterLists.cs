@@ -10,8 +10,6 @@ namespace TwitterAPI
 	[DataContract]
 	public abstract class TwitterList
 	{
-		private static readonly string List_Url = "https://api.twitter.com/1.1/lists/list.json";
-		private static readonly string List_Statuses = "https://api.twitter.com/1.1/lists/statuses.json";
 
 		[DataMember(Name = "created_at")]
 		private string created_at { get; set; }
@@ -56,12 +54,12 @@ namespace TwitterAPI
 
 		public static TwitterResponse<TwitterListCollection> List(OAuthTokens tokens, UserOptions option = null)
 		{
-			return new TwitterResponse<TwitterListCollection>(Method.Get(List_Url, tokens, option));
+			return new TwitterResponse<TwitterListCollection>(Method.Get(UrlBank.ListsList, tokens, option));
 		}
 
 		public static TwitterResponse<TwitterStatusCollection> Statuses(OAuthTokens tokens, ListsStatusesOptions option)
 		{
-			return new TwitterResponse<TwitterStatusCollection>(Method.Get(List_Statuses, tokens, option));
+			return new TwitterResponse<TwitterStatusCollection>(Method.Get(UrlBank.ListsStatuses, tokens, option));
 		}
 	}
 

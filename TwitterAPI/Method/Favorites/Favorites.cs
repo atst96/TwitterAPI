@@ -13,11 +13,11 @@ namespace TwitterAPI
 		{
 			if (tokens == null) throw new ArgumentNullException("tokens");
 			if (Id < 1) throw new ArgumentNullException("StatusId");
-			Dictionary<string, string> dic = new Dictionary<string, string>();
+			var dic = new Dictionary<string, string>();
 			dic.Add("id", Id.ToString());
 			if (IncludeEntities == true) dic.Add("include_entities", IncludeEntities.ToString());
 
-			var result = Method.Post(UrlBank.FAVORITES_CREATE, tokens, new favParam { Id = Id, IncludeEntities = IncludeEntities }, null, null, null);
+			var result = Method.Post(UrlBank.FavoritesCreate, tokens, new favParam { Id = Id, IncludeEntities = IncludeEntities }, null, null, null);
 
 			return new TwitterResponse<TwitterStatus>(result);
 		}

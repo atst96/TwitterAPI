@@ -8,11 +8,10 @@ namespace TwitterAPI
 {
     public abstract partial class TwitterFavorites
     {
-        static string Url_Favorites_List = "https://api.twitter.com/1.1/favorites/list.json";
 
 		public static TwitterResponse<TwitterStatus> List(OAuthTokens tokens, FavoritesListOptions options)
 		{
-			var res = Method.Get(Url_Favorites_List, tokens, options);
+			var res = Method.Get(UrlBank.FavoritesList, tokens, options);
 			throw new Exception("未実装");
 			return null;
 		}

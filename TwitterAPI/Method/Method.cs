@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net;
-using System.Web;
-
-using TwitterAPI;
-using Core;
-
-using System.IO;
-using System.Security.Cryptography;
-
+﻿using Core;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace TwitterAPI
 {
@@ -63,7 +58,7 @@ namespace TwitterAPI
 
 		public static HttpWebRequest GenerateWebRequest(string url, WebMethod method,OAuthTokens tokens, ParameterClass parameters,string contentType, string postHeader, byte[] data)
 		{
-			OAuthBase oauth = new OAuthBase();
+			var oauth = new OAuthBase();
 
 			string addr = url, timestamp = oauth.GenerateTimeStamp(), nonce = oauth.GenerateNonce(), normalizedUrl, normalizedReqParams, signature;
 
@@ -84,7 +79,7 @@ namespace TwitterAPI
 
 				if (parameters != null)
 				{
-					string param = parameters.GenerateParameters("bearer");
+					var param = parameters.GenerateParameters("bearer");
 					if (!string.IsNullOrEmpty(param))
 						req.Headers.Add(HttpRequestHeader.Authorization, param);
 				}
@@ -95,7 +90,7 @@ namespace TwitterAPI
 
 				string signatureBase = oauth.GenerateSignatureBase(new Uri(addr), tokens.ConsumerKey, tokens.AccessToken, tokens.AccessTokenSecret, "POST", timestamp, nonce, "HMAC-SHA1", out normalizedUrl, out normalizedReqParams) + (!string.IsNullOrEmpty(postHeader) ? Uri.EscapeDataString("&" + postHeader) : ""),
 					compositKey = string.Concat(Uri.EscapeDataString(tokens.ConsumerSecret), "&", Uri.EscapeDataString(tokens.AccessTokenSecret)), oauthSignature;
-				using (HMACSHA1 hasher = new HMACSHA1(UTF8Encoding.UTF8.GetBytes(compositKey))) oauthSignature = Convert.ToBase64String(hasher.ComputeHash(UTF8Encoding.UTF8.GetBytes(signatureBase)));
+				using (var hasher = new HMACSHA1(UTF8Encoding.UTF8.GetBytes(compositKey))) oauthSignature = Convert.ToBase64String(hasher.ComputeHash(UTF8Encoding.UTF8.GetBytes(signatureBase)));
 
 				signature = string.Format("OAuth {0}\", oauth_signature=\"{1}\"", normalizedReqParams.Replace("=", "=\"").Replace("&", "\", "), Uri.EscapeDataString(oauthSignature));
 				req.Headers.Add(HttpRequestHeader.Authorization, signature);
@@ -115,12 +110,12 @@ namespace TwitterAPI
 		{
 			var req = request;
 
-			ResponseResult result = new ResponseResult();
+			var result = new ResponseResult();
 
 			try
 			{
-				WebResponse res = req.GetResponse();
-				using (StreamReader reader = new StreamReader(res.GetResponseStream()))
+				var res = req.GetResponse();
+				using (var reader = new StreamReader(res.GetResponseStream()))
 					result.ResponseStream = reader.ReadToEnd();
 				result.Result = StatusResult.Success;
 				result.AccessLevel = WebHeaderToAccessLevel(res.Headers);
@@ -137,24 +132,32 @@ namespace TwitterAPI
 					result.Result = GetStatusResult(ex.Status);
 					result.ResponseStream = null;
 
-					using (StreamReader reader = new StreamReader(ex.Response.GetResponseStream()))
+					var stream = ex.Response.GetResponseStream();
+					if (stream != null)
 					{
-						JObject obj = (JObject)JsonConvert.DeserializeObject(reader.ReadToEnd());
-						var errors = obj.SelectToken("errors", false);
-						if (errors != null)
+						using (var reader = new StreamReader(stream))
 						{
-							if (errors.Type == JTokenType.String)
+							var obj = (JObject)JsonConvert.DeserializeObject(reader.ReadToEnd());
+							var errors = obj.SelectToken("errors", false);
+							if (errors != null)
 							{
-								result.Error = new TwitterError();
-								result.Error.Message = errors.ToString();
-							}
-							else if (errors.Type == JTokenType.Array)
-							{
-								result.Error = new TwitterError();
-								result.Error = JsonConvert.DeserializeObject<List<TwitterError>>(errors.ToString())[0];
-							}
+								if (errors.Type == JTokenType.String)
+								{
+									result.Error = new TwitterError();
+									result.Error.Message = errors.ToString();
+								}
+								else if (errors.Type == JTokenType.Array)
+								{
+									result.Error = new TwitterError();
+									result.Error = JsonConvert.DeserializeObject<List<TwitterError>>(errors.ToString())[0];
+								}
 
+							}
 						}
+					}
+					else
+					{
+						throw new Exception();
 					}
 					
 					result.AccessLevel = WebHeaderToAccessLevel(ex.Response.Headers);
@@ -180,13 +183,13 @@ namespace TwitterAPI
 
 		public static ResponseResult xAuthOAuthGet(string url, OAuthTokens tokens, string username, string password, Dictionary<string, string> param = null, string mode = "client_auth")
 		{
-			OAuthBase oauth = new OAuthBase();
+			var oauth = new OAuthBase();
 
 			// タイムスタンプの生成
-			string timestamp = oauth.GenerateTimeStamp();
+			var timestamp = oauth.GenerateTimeStamp();
 
 			// nonceの生成
-			string nonce = oauth.GenerateNonce();
+			var nonce = oauth.GenerateNonce();
 
 			string normalizedUrl, normalizedReqParams;
 
@@ -204,14 +207,14 @@ namespace TwitterAPI
 			string requestUrl = string.Format("{0}?{1}&oauth_signature={2}",
 				normalizedUrl, normalizedReqParams, Uri.EscapeDataString(signature));
 
-			WebRequest req = WebRequest.Create(requestUrl);
+			var req = WebRequest.Create(requestUrl);
 
-			ResponseResult result = new ResponseResult();
+			var result = new ResponseResult();
 
 			try
 			{
-				WebResponse res = req.GetResponse();
-				StreamReader reader = new StreamReader(res.GetResponseStream());
+				var res = req.GetResponse();
+				var reader = new StreamReader(res.GetResponseStream());
 				result.ResponseStream = reader.ReadToEnd();
 				result.Result = StatusResult.Success;
 
@@ -227,9 +230,9 @@ namespace TwitterAPI
 			{
 				result.Result = GetStatusResult(ex.Status);
 				result.ResponseStream = null;
-				using (StreamReader reader = new StreamReader(ex.Response.GetResponseStream()))
+				using (var reader = new StreamReader(ex.Response.GetResponseStream()))
 				{
-					JObject obj = (JObject)JsonConvert.DeserializeObject(reader.ReadToEnd());
+					var obj = (JObject)JsonConvert.DeserializeObject(reader.ReadToEnd());
 					var errors = obj.SelectToken("errors", false);
 					if (errors != null)
 					{
@@ -270,7 +273,7 @@ namespace TwitterAPI
 
         public static StatusResult GetStatusResult(WebExceptionStatus status)
         {
-            StatusResult result = new StatusResult();
+            var result = new StatusResult();
             switch ((HttpStatusCode)status)
             {
                 case HttpStatusCode.OK:
@@ -355,7 +358,7 @@ namespace TwitterAPI
         {
             public static string DictionaryToParams(Dictionary<string, string> dic)
             {
-                string param = "";
+                var param = "";
                 foreach (var values in dic.Select((v, i) => new { v, i }))
                 {
                     if (values.i == 0) param += string.Format("?{0}={1}", values.v.Key, UrlEncode(values.v.Value));
@@ -449,9 +452,9 @@ namespace TwitterAPI
         /// <returns></returns>
         public string GenerateGetParameters()
         {
-            List<string> param = new List<string>();
+            var param = new List<string>();
 
-            Type type = this.GetType();
+            var type = this.GetType();
 
             MemberInfo[] members = type.GetMembers(
                 BindingFlags.Public | BindingFlags.NonPublic |
@@ -460,8 +463,8 @@ namespace TwitterAPI
             {
                 if (m.MemberType == MemberTypes.Property)
                 {
-                    PropertyInfo property = type.GetProperty(m.Name);
-                    Attribute attr = Attribute.GetCustomAttribute(m, typeof(Parameters));
+                    var property = type.GetProperty(m.Name);
+                    var attr = Attribute.GetCustomAttribute(m, typeof(Parameters));
                     var attribute = attr as Parameters;
                     if (attribute != null && !string.IsNullOrEmpty(attribute.ParmaterName))
                     {
@@ -481,9 +484,9 @@ namespace TwitterAPI
 
 		public string GenerateParameters(string paramName)
 		{
-			List<string> param = new List<string>();
+			var param = new List<string>();
 
-			Type type = this.GetType();
+			var type = this.GetType();
 
 			MemberInfo[] members = type.GetMembers(
 				BindingFlags.Public | BindingFlags.NonPublic |
@@ -492,8 +495,8 @@ namespace TwitterAPI
 			{
 				if (m.MemberType == MemberTypes.Property)
 				{
-					PropertyInfo property = type.GetProperty(m.Name);
-					Attribute attr = Attribute.GetCustomAttribute(m, typeof(Parameters));
+					var property = type.GetProperty(m.Name);
+					var attr = Attribute.GetCustomAttribute(m, typeof(Parameters));
 					var attribute = attr as Parameters;
 					if (attribute != null && !string.IsNullOrEmpty(attribute.ParmaterName))
 					{
@@ -517,9 +520,9 @@ namespace TwitterAPI
         /// <returns></returns>
         public string GeneratePostParameters()
         {
-            List<string> param = new List<string>();
+            var param = new List<string>();
 
-            Type type = this.GetType();
+            var type = this.GetType();
 
             MemberInfo[] members = type.GetMembers(
                 BindingFlags.Public | BindingFlags.NonPublic |
@@ -528,8 +531,8 @@ namespace TwitterAPI
             {
                 if (m.MemberType == MemberTypes.Property)
                 {
-                    PropertyInfo property = type.GetProperty(m.Name);
-                    Attribute attr = Attribute.GetCustomAttribute(m, typeof(Parameters));
+                    var property = type.GetProperty(m.Name);
+                    var attr = Attribute.GetCustomAttribute(m, typeof(Parameters));
                     var attribute = attr as Parameters;
                     if (attribute != null)
                     {

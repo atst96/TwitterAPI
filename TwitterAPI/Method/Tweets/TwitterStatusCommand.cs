@@ -14,12 +14,6 @@ namespace TwitterAPI
     {
         private static OAuthBase oauth = new OAuthBase();
 
-        private static readonly string StatusUpdateUrl = "https://api.twitter.com/1.1/statuses/update.json";
-        private static readonly string StatuUpdateWithMediaUrl = "https://api.twitter.com/1.1/statuses/update_with_media.json";
-        private static readonly string RetweetUrl = "https://api.twitter.com/1.1/statuses/retweet/{0}.json";
-        private static readonly string DestroyRetweetUrl = "https://api.twitter.com/1.1/statuses/destroy/{0}.json";
-
-
         /// <summary>
         /// ツイートを投稿します。
         /// </summary>
@@ -28,9 +22,9 @@ namespace TwitterAPI
         /// <param name="options">オプション</param>
         public static TwitterResponse<TwitterStatus> Update(string tweet, OAuthTokens tokens, StatusUpdateOptions options = null)
         {
-            string url = StatusUpdateUrl;
+            var url = UrlBank.StatusesUpdate;
 
-			string data = "status=" + Method.UrlEncode(tweet);
+			var data = "status=" + Method.UrlEncode(tweet);
 			return new TwitterResponse<TwitterStatus>(Method.GenerateResponseResult(Method.GenerateWebRequest(url, WebMethod.POST, tokens, options, "application/x-www-form-urlencoded", data, UTF8Encoding.UTF8.GetBytes(data))));
         }
 
@@ -46,23 +40,23 @@ namespace TwitterAPI
 			if (content == null)
 				throw new ArgumentNullException("content");
 
-			string url = StatuUpdateWithMediaUrl;
+			var url = UrlBank.StatusesUpdateWithMedia;
 
-			string boundary = Guid.NewGuid().ToString();
+			var boundary = Guid.NewGuid().ToString();
 
-			string header = string.Format("--{0}", boundary);
-			string footer = string.Format("--{0}--", boundary);
+			var header = string.Format("--{0}", boundary);
+			var footer = string.Format("--{0}--", boundary);
 
-			string ContentType = "multipart/form-data;boundary=" + boundary;
+			var ContentType = "multipart/form-data;boundary=" + boundary;
 
 			/*--------------------  送信するデータの生成  --------------------*/
 
 			var encoding = Encoding.GetEncoding("iso-8859-1");
 
-			string fileData = encoding.GetString(content);
+			var fileData = encoding.GetString(content);
 
 
-			StringBuilder builder = new StringBuilder();
+			var builder = new StringBuilder();
 
 			// ヘッダーを書き込む
 			builder.AppendLine(header);
@@ -109,7 +103,7 @@ namespace TwitterAPI
 		{
 			if (id < 1) throw new ArgumentNullException("Id");
 
-			return new TwitterResponse<TwitterStatus>(Method.Post(string.Format(RetweetUrl, id), tokens, null, null, null, null));
+			return new TwitterResponse<TwitterStatus>(Method.Post(string.Format(UrlBank.StatusesRetweet, id), tokens, null, null, null, null));
 		}
 
 
@@ -122,7 +116,7 @@ namespace TwitterAPI
         {
             if (id < 1) throw new ArgumentNullException("Id");
 
-			return new TwitterResponse<TwitterStatus>(Method.Post(string.Format(DestroyRetweetUrl, id), tokens, null, null, null, null));
+			return new TwitterResponse<TwitterStatus>(Method.Post(string.Format(UrlBank.StatusesDestroy, id), tokens, null, null, null, null));
         }
     }
 }

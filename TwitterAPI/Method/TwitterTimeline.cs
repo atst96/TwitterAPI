@@ -12,16 +12,6 @@ namespace TwitterAPI
     public static partial class TwitterTimeline
     {
 
-        private static string Url_Mentions_Timeline = "https://api.twitter.com/1.1/statuses/mentions_timeline.json";
-
-        private static string Url_Home_Timeline = "https://api.twitter.com/1.1/statuses/home_timeline.json";
-
-        private static string Url_User_Timeline = "https://api.twitter.com/1.1/statuses/user_timeline.json";
-
-        private static string Url_Retweet_Of_Me = "https://api.twitter.com/1.1/statuses/retweets_of_me.json";
-
-
-
         private static TwitterResponse<TwitterStatusCollection> GetTimeline(string Url, OAuthTokens tokens, TimelineOptions options = null)
         {
                 return new TwitterResponse<TwitterStatusCollection>(Method.Get(Url, tokens, options));
@@ -35,7 +25,7 @@ namespace TwitterAPI
 		/// <returns>TwitterStatusCollection</returns>
 		public static TwitterResponse<TwitterStatusCollection> UserTimeline(OAuthTokens tokens, TimelineOptions options = null)
 		{
-			return GetTimeline(Url_User_Timeline, tokens, options);
+			return GetTimeline(UrlBank.UserTimeline, tokens, options);
 		}
 
 		/// <summary>
@@ -46,7 +36,7 @@ namespace TwitterAPI
 		/// <returns>TwitterStatusCollection</returns>
 		public static TwitterResponse<TwitterStatusCollection> RetweetOfMe(OAuthTokens tokens, TimelineOptions options = null)
 		{
-			return GetTimeline(Url_Retweet_Of_Me, tokens, options);
+			return GetTimeline(UrlBank.RetweetsOfMe, tokens, options);
 		}
 
 		/// <summary>
@@ -57,7 +47,7 @@ namespace TwitterAPI
 		/// <returns>TwitterStatusCollection</returns>
 		public static TwitterResponse<TwitterStatusCollection> MentionsTimeline(OAuthTokens tokens, TimelineOptions options = null)
 		{
-			return GetTimeline(Url_Mentions_Timeline, tokens, options);
+			return GetTimeline(UrlBank.MentionsTimeline, tokens, options);
 		}
 
 		/// <summary>
@@ -68,7 +58,7 @@ namespace TwitterAPI
 		/// <returns>TwitterStatusCollection</returns>
 		public static TwitterResponse<TwitterStatusCollection> HomeTimeline(OAuthTokens tokens, TimelineOptions options = null)
 		{
-			return GetTimeline(Url_Home_Timeline, tokens, options);
+			return GetTimeline(UrlBank.HomeTimeline, tokens, options);
 		}
 
 

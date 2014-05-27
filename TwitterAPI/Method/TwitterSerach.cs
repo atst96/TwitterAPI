@@ -11,11 +11,10 @@ namespace TwitterAPI
 {
     public abstract class TwitterSearch
     {
-        private static string Url_Serach_Tweets = "https://api.twitter.com/1.1/search/tweets.json";
 
-        public static TwitterResponse<TwitterSearchCollection> Search(OAuthTokens tokens, TwitterSearchOptions Options = null)
+		public static TwitterResponse<TwitterSearchCollection> Search(OAuthTokens tokens, TwitterSearchOptions Options = null)
         {
-            return new TwitterResponse<TwitterSearchCollection>(Method.Get(Url_Serach_Tweets, tokens, Options));
+            return new TwitterResponse<TwitterSearchCollection>(Method.Get(UrlBank.SearchTweets, tokens, Options));
         }
 
         /// <summary>

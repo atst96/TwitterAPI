@@ -7,27 +7,20 @@ namespace TwitterAPI
 {
     public abstract partial class TwitterAccount
     {
-        /*----------/  URLs  /----------*/
-        private static string Url_Verify_Credentials = "https://api.twitter.com/1.1/account/verify_credentials.json";
-
-		private static string Url_Users_Show = "https://api.twitter.com/1.1/users/show.json";
-
-		private static string Update_Profile_Url = "https://api.twitter.com/1.1/account/update_profile.json";
-
 
 		public static TwitterResponse<TwitterUser> VerifyCredentials(OAuthTokens tokens)
 		{
-			return new TwitterResponse<TwitterUser>(Method.Get(Url_Verify_Credentials, tokens));
+			return new TwitterResponse<TwitterUser>(Method.Get(UrlBank.AccountVerifyCredentails, tokens));
 		}
 
 		public static TwitterResponse<TwitterUser> UpdateProfile(OAuthTokens tokens, UpdateProfileOption option)
 		{
-			return new TwitterResponse<TwitterUser>(Method.Post(Update_Profile_Url, tokens, option, "application/x-www-form-urlencoded", null, null));
+			return new TwitterResponse<TwitterUser>(Method.Post(UrlBank.AccountUpdateProfile, tokens, option, "application/x-www-form-urlencoded", null, null));
 		}
 
 		public static TwitterResponse<TwitterUser> Show(OAuthTokens tokens, UsersShowOption option)
 		{
-			return new TwitterResponse<TwitterUser>(Method.Get(Url_Users_Show, tokens, option));
+			return new TwitterResponse<TwitterUser>(Method.Get(UrlBank.UsersShow, tokens, option));
 		}
 
 		public class UsersShowOption : ParameterClass

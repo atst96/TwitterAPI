@@ -29,15 +29,15 @@ namespace TwitterAPI
         private static string GenerateHeader(OAuthTokens tokens, string url,
             out string normalizedUrl, out string normalizedReqParam)
         {
-            Uri uri = new Uri(url);
+            var uri = new Uri(url);
 
-            string nonce = oauth.GenerateNonce();
-            string timestamp = oauth.GenerateTimeStamp();
-            string signature = oauth.GenerateSignature(uri,
+            var nonce = oauth.GenerateNonce();
+            var timestamp = oauth.GenerateTimeStamp();
+            var signature = oauth.GenerateSignature(uri,
                 tokens.ConsumerKey, tokens.ConsumerSecret, tokens.AccessToken, tokens.AccessTokenSecret,
                 "GET", timestamp, nonce, out normalizedUrl, out normalizedReqParam);
 
-            string oauthSignaturePattern = "OAuth realm=\"{0:s}\", oauth_consumer_key=\"{1:s}\","
+            var oauthSignaturePattern = "OAuth realm=\"{0:s}\", oauth_consumer_key=\"{1:s}\","
                 + " oauth_signature_method=\"HMAC-SHA1\","
                 + " oauth_token=\"{2:s}\", oauth_timestamp=\"{3:s}\", oauth_nonce=\"{4:s}\","
                 + " oauth_version=\"1.0\", oauth_signature=\"{5:s}\"";
@@ -109,14 +109,14 @@ namespace TwitterAPI
 
             var req = OAuthEchoUpdate(tokens, bytes, boundary, TwitPicRealm, Provider_Url, TwitPic_Url);
 
-            TwitterResponse<UpdateImageJsonReponse> response = new TwitterResponse<UpdateImageJsonReponse>();
+            var response = new TwitterResponse<UpdateImageJsonReponse>();
 
             if (req.GetType() == typeof(HttpWebResponse))
             {
                 try
                 {
                     var res = (WebResponse)req;
-                    StreamReader reader = new StreamReader(res.GetResponseStream());
+                    var reader = new StreamReader(res.GetResponseStream());
                     response.ResponseObject = JsonConvert.DeserializeObject<UpdateImageJsonReponse>(reader.ReadToEnd());
                     reader.Close();
                     response.Result = StatusResult.Success;
@@ -131,11 +131,11 @@ namespace TwitterAPI
             else if (response.GetType() == typeof(WebException))
             {
                 var ex = (WebException)req;
-                StreamReader reader = new StreamReader(ex.Response.GetResponseStream());
+                var reader = new StreamReader(ex.Response.GetResponseStream());
                 string res = reader.ReadToEnd();
                 reader.Dispose();
 
-                JObject obj = (JObject)JsonConvert.DeserializeObject(res);
+                var obj = (JObject)JsonConvert.DeserializeObject(res);
                 var errors = obj.SelectToken("errors", false);
                 if (errors != null)
                 {
@@ -170,11 +170,11 @@ namespace TwitterAPI
 
             var boundary = Guid.NewGuid().ToString();
 
-            string bodyHead = string.Format("--{0}", boundary);
-            string bodyFoot = string.Format("--{0}--", boundary);
+            var bodyHead = string.Format("--{0}", boundary);
+            var bodyFoot = string.Format("--{0}--", boundary);
 
 
-            string FileContentType = "";
+            var FileContentType = "";
             switch (Path.GetExtension(fileName))
             {
                 case ".png":
@@ -182,13 +182,13 @@ namespace TwitterAPI
                     break;
             }
 
-            StringBuilder contents = new StringBuilder();
+            var contents = new StringBuilder();
 
 
-            string fileHeader = string.Format("Content-Disposition: file; name=\"{0:s}\";"
+            var fileHeader = string.Format("Content-Disposition: file; name=\"{0:s}\";"
                     + " filename=\"{1:s}\"", "media", Path.GetFileName(fileName));
 
-            string fileData = FileToString(fileName, encoding);
+            var fileData = FileToString(fileName, encoding);
 
             contents.AppendLine(bodyHead);
             contents.AppendLine(fileHeader);
@@ -206,19 +206,19 @@ namespace TwitterAPI
 
             System.Diagnostics.Debug.WriteLine(contents.ToString());
 
-            byte[] bytes = encoding.GetBytes(contents.ToString());
+            var bytes = encoding.GetBytes(contents.ToString());
 
 
             var req = OAuthEchoUpdate(tokens, bytes, boundary, TwitterRealm, Provider_Url, ImgLy_Url);
 
-            TwitterResponse<UpdateImageJsonReponse> response = new TwitterResponse<UpdateImageJsonReponse>();
+            var response = new TwitterResponse<UpdateImageJsonReponse>();
 
             if (req.GetType() == typeof(HttpWebResponse))
             {
                 try
                 {
                     var res = (WebResponse)req;
-                    StreamReader reader = new StreamReader(res.GetResponseStream());
+                    var reader = new StreamReader(res.GetResponseStream());
                     response.ResponseObject = JsonConvert.DeserializeObject<UpdateImageJsonReponse>(reader.ReadToEnd());
                     reader.Close();
                     response.Result = StatusResult.Success;
@@ -233,11 +233,11 @@ namespace TwitterAPI
             else if (response.GetType() == typeof(WebException))
             {
                 var ex = (WebException)req;
-                StreamReader reader = new StreamReader(ex.Response.GetResponseStream());
+                var reader = new StreamReader(ex.Response.GetResponseStream());
                 string res = reader.ReadToEnd();
                 reader.Dispose();
 
-                JObject obj = (JObject)JsonConvert.DeserializeObject(res);
+                var obj = (JObject)JsonConvert.DeserializeObject(res);
                 var errors = obj.SelectToken("errors", false);
                 if (errors != null)
                 {
@@ -273,13 +273,13 @@ namespace TwitterAPI
             var boundary = Guid.NewGuid().ToString();
 
             string normalizedUrl, normalizedReqParam;
-            string signature = GenerateHeader(tokens, Provider_Url, out normalizedUrl, out normalizedReqParam);
+            var signature = GenerateHeader(tokens, Provider_Url, out normalizedUrl, out normalizedReqParam);
 
-            string bodyHead = string.Format("--{0}", boundary);
-            string bodyFoot = string.Format("--{0}--", boundary);
+            var bodyHead = string.Format("--{0}", boundary);
+            var bodyFoot = string.Format("--{0}--", boundary);
 
 
-            string FileContentType = "";
+            var FileContentType = "";
             switch (Path.GetExtension(fileName))
             {
                 case ".png":
@@ -287,13 +287,13 @@ namespace TwitterAPI
                     break;
             }
 
-            StringBuilder contents = new StringBuilder();
+            var contents = new StringBuilder();
 
 
-            string fileHeader = string.Format("Content-Disposition: file; name=\"{0:s}\";"
+            var fileHeader = string.Format("Content-Disposition: file; name=\"{0:s}\";"
                     + " filename=\"{1:s}\"", "media", Path.GetFileName(fileName));
 
-            string fileData = FileToString(fileName, encoding);
+            var fileData = FileToString(fileName, encoding);
 
             contents.AppendLine(bodyHead);
 
@@ -307,35 +307,35 @@ namespace TwitterAPI
 
             System.Diagnostics.Debug.WriteLine(contents.ToString());
 
-            byte[] bytes = encoding.GetBytes(contents.ToString());
+            var bytes = encoding.GetBytes(contents.ToString());
 
 
             var req = OAuthEchoUpdate(tokens, bytes, boundary, TwitterRealm, Provider_Url, TwipplePhoto_Url);
 
-            TwitterResponse<UpdateImageXmlResponse> response = new TwitterResponse<UpdateImageXmlResponse>();
+            var response = new TwitterResponse<UpdateImageXmlResponse>();
 
             if (req.GetType() == typeof(HttpWebResponse))
             {
                 try
                 {
                     var res = (WebResponse)req;
-                    StreamReader reader = new StreamReader(res.GetResponseStream());
-                    string result = reader.ReadToEnd();
+                    var reader = new StreamReader(res.GetResponseStream());
+                    var result = reader.ReadToEnd();
                     reader.Dispose();
 
-                    using (Stream stream = new MemoryStream(Encoding.UTF8.GetBytes(result)))
+                    using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(result)))
                     {
                         try
                         {
                             if (result.Contains("<rsp stat=\"ok\">"))
                             {
-                                XmlSerializer serializer = new XmlSerializer(typeof(UpdateImageXmlResponse));
+                                var serializer = new XmlSerializer(typeof(UpdateImageXmlResponse));
                                 response.ResponseObject = (UpdateImageXmlResponse)serializer.Deserialize(stream);
                             }
                             else if (result.Contains("<rsp stat=\"fail\">"))
                             {
-                                XmlSerializer serializer = new XmlSerializer(typeof(UpdateImageXmlError));
-                                UpdateImageXmlError error = (UpdateImageXmlError)serializer.Deserialize(stream);
+                                var serializer = new XmlSerializer(typeof(UpdateImageXmlError));
+                                var error = (UpdateImageXmlError)serializer.Deserialize(stream);
                                 response.Error = new TwitterError();
                                 response.Error.Message = error.Error.Message;
                                 response.Error.ErrorCode = error.Error.Code;
@@ -388,12 +388,12 @@ namespace TwitterAPI
             var boundary = Guid.NewGuid().ToString();
 
             string normalizedUrl, normalizedReqParam;
-            string signature = GenerateHeader(tokens, Provider_Url, out normalizedUrl, out normalizedReqParam);
+            var signature = GenerateHeader(tokens, Provider_Url, out normalizedUrl, out normalizedReqParam);
 
-            string bodyHead = string.Format("--{0}", boundary);
-            string bodyFoot = string.Format("--{0}--", boundary);
+            var bodyHead = string.Format("--{0}", boundary);
+            var bodyFoot = string.Format("--{0}--", boundary);
 
-            string FileContentType = "";
+            var FileContentType = "";
             switch (Path.GetExtension(fileName))
             {
                 case ".png":
@@ -401,12 +401,12 @@ namespace TwitterAPI
                     break;
             }
 
-            StringBuilder contents = new StringBuilder();
+            var contents = new StringBuilder();
 
-            string fileHeader = string.Format("Content-Disposition: file; name=\"{0:s}\";"
+            var fileHeader = string.Format("Content-Disposition: file; name=\"{0:s}\";"
                     + " filename=\"{1:s}\"", "media", Path.GetFileName(fileName));
 
-            string fileData = FileToString(fileName, encoding);
+            var fileData = FileToString(fileName, encoding);
 
             contents.AppendLine(bodyHead);
 
@@ -423,12 +423,12 @@ namespace TwitterAPI
             contents.AppendLine(bodyFoot);
 
 
-            byte[] bytes = encoding.GetBytes(contents.ToString());
+            var bytes = encoding.GetBytes(contents.ToString());
 
 
             var req = OAuthEchoUpdate(tokens, bytes, boundary, TwitterRealm, Provider_Url, YFrog_Url);
 
-            TwitterResponse<UpdateImageJsonResponse2> response = new TwitterResponse<UpdateImageJsonResponse2>();
+            var response = new TwitterResponse<UpdateImageJsonResponse2>();
 
             if (req.GetType() == typeof(HttpWebResponse))
             {
@@ -453,9 +453,9 @@ namespace TwitterAPI
                 {
                     try
                     {
-                        XmlSerializer serializer = new XmlSerializer(typeof(UpdateImageXmlError));
-                        Stream stream = new MemoryStream(Encoding.UTF8.GetBytes(str));
-                        UpdateImageXmlError error = (UpdateImageXmlError)serializer.Deserialize(stream);
+                        var serializer = new XmlSerializer(typeof(UpdateImageXmlError));
+                        var stream = new MemoryStream(Encoding.UTF8.GetBytes(str));
+                        var error = (UpdateImageXmlError)serializer.Deserialize(stream);
                         stream.Close();
                         response.Error.ErrorCode = (int)error.Error.Code;
                         response.Error.Message = error.Error.Message;
@@ -495,7 +495,7 @@ namespace TwitterAPI
         /// <returns>文字列</returns>
         public static string FileToString(string fileName, Encoding encoding)
         {
-            FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+            var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
             byte[] imgBytes = new byte[fs.Length];
             fs.Read(imgBytes, 0, imgBytes.Length);
             string fileData = encoding.GetString(imgBytes);
@@ -511,13 +511,13 @@ namespace TwitterAPI
 
             string normalizedUrl, normalizedReqParam;
 
-            string nonce = oauth.GenerateNonce();
-            string timestamp = oauth.GenerateTimeStamp();
-            string signature = oauth.GenerateSignature(new Uri(provider_url),
+            var nonce = oauth.GenerateNonce();
+            var timestamp = oauth.GenerateTimeStamp();
+            var signature = oauth.GenerateSignature(new Uri(provider_url),
                 tokens.ConsumerKey, tokens.ConsumerSecret, tokens.AccessToken, tokens.AccessTokenSecret, "GET",
                 timestamp, nonce, out normalizedUrl, out normalizedReqParam);
 
-            string oauthHeader = string.Format("OAuth realm=\"{0:s}\", oauth_consumer_key=\"{1:s}\","
+            var oauthHeader = string.Format("OAuth realm=\"{0:s}\", oauth_consumer_key=\"{1:s}\","
                 + " oauth_signature_method=\"HMAC-SHA1\","
                 + " oauth_token=\"{2:s}\", oauth_timestamp=\"{3:s}\", oauth_nonce=\"{4:s}\","
                 + " oauth_version=\"1.0\", oauth_signature=\"{5:s}\"",
@@ -537,7 +537,7 @@ namespace TwitterAPI
 
             /*-------------------- POST内容の書き込み --------------------*/
 
-            using (Stream writer = req.GetRequestStream())
+            using (var writer = req.GetRequestStream())
                 writer.Write(postBody, 0, postBody.Length);
 
             try
@@ -546,7 +546,7 @@ namespace TwitterAPI
             }
             catch (WebException ex)
             {
-                StreamReader reader = new StreamReader(ex.Response.GetResponseStream());
+                var reader = new StreamReader(ex.Response.GetResponseStream());
                 reader.Dispose();
                 return ex;
             }

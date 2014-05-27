@@ -109,8 +109,8 @@ namespace Core
 				throw new ArgumentNullException("data");
 			}
 
-			byte[] dataBuffer = System.Text.Encoding.UTF8.GetBytes(data);
-			byte[] hashBytes = hashAlgorithm.ComputeHash(dataBuffer);
+			var dataBuffer = System.Text.Encoding.UTF8.GetBytes(data);
+			var hashBytes = hashAlgorithm.ComputeHash(dataBuffer);
 
 			return Convert.ToBase64String(hashBytes);
 		}
@@ -127,18 +127,18 @@ namespace Core
 				parameters = parameters.Remove(0, 1);
 			}
 
-			List<QueryParameter> result = new List<QueryParameter>();
+			var result = new List<QueryParameter>();
 
 			if (!string.IsNullOrEmpty(parameters))
 			{
-				string[] p = parameters.Split('&');
+				var p = parameters.Split('&');
 				foreach (string s in p)
 				{
 					if (!string.IsNullOrEmpty(s) && !s.StartsWith(OAuthParameterPrefix))
 					{
 						if (s.IndexOf('=') > -1)
 						{
-							string[] temp = s.Split('=');
+							var temp = s.Split('=');
 							result.Add(new QueryParameter(temp[0], temp[1]));
 						}
 						else
@@ -160,7 +160,7 @@ namespace Core
 		/// <returns>Returns a Url encoded string</returns>
 		protected string UrlEncode(string value)
 		{
-			StringBuilder result = new StringBuilder();
+			var result = new StringBuilder();
 
 			foreach (char symbol in value)
 			{
@@ -184,7 +184,7 @@ namespace Core
 		/// <returns>a string representing the normalized parameters</returns>
 		protected string NormalizeRequestParameters(IList<QueryParameter> parameters)
 		{
-			StringBuilder sb = new StringBuilder();
+			var sb = new StringBuilder();
 			QueryParameter p = null;
 			for (int i = 0; i < parameters.Count; i++)
 			{
@@ -240,7 +240,7 @@ namespace Core
 			normalizedUrl = null;
 			normalizedRequestParameters = null;
 
-			List<QueryParameter> parameters = GetQueryParameters(url.Query);
+			var parameters = GetQueryParameters(url.Query);
 			parameters.Add(new QueryParameter(OAuthVersionKey, OAuthVersion));
 			parameters.Add(new QueryParameter(OAuthNonceKey, nonce));
 			parameters.Add(new QueryParameter(OAuthTimestampKey, timeStamp));
@@ -262,7 +262,7 @@ namespace Core
 			normalizedUrl += url.AbsolutePath;
 			normalizedRequestParameters = NormalizeRequestParameters(parameters);
 
-			StringBuilder signatureBase = new StringBuilder();
+			var signatureBase = new StringBuilder();
 			signatureBase.AppendFormat("{0}&", httpMethod.ToUpper());
 			signatureBase.AppendFormat("{0}&", UrlEncode(normalizedUrl));
 			signatureBase.AppendFormat("{0}", UrlEncode(normalizedRequestParameters));
@@ -337,7 +337,7 @@ namespace Core
 		public virtual string GenerateTimeStamp()
 		{
 			// Default implementation of UNIX time of the current UTC time
-			TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
+			var ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
 			return Convert.ToInt64(ts.TotalSeconds).ToString();
 		}
 
@@ -358,8 +358,8 @@ namespace Core
 		public virtual string GenerateNonce()
 		{
 			// Just a simple implementation of a random number between 123400 and 9999999
-			string strings = "0123456789abcdefghijklmnopqrstuvwxyABCDEFGHIJKLMNOPQRSTUVWXYZ";
-			string res = "";
+			var strings = "0123456789abcdefghijklmnopqrstuvwxyABCDEFGHIJKLMNOPQRSTUVWXYZ";
+			var res = "";
 			for (int i = 0; i < 32; i++)
 				res += strings[random.Next(0, strings.Length - 1)];
 			return res;
