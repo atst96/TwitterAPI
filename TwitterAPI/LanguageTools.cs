@@ -7,7 +7,7 @@ namespace TwitterAPI
 {
 	public abstract class LanguageTools
 	{
-		public static string APIErrorCodeToJapanese(long code)
+		public static string APIErrorCodeToJapanese(long code, string sub = null)
 		{
 			switch (code)
 			{
@@ -25,11 +25,12 @@ namespace TwitterAPI
 				case 179: return "申し訳ありませんが、ツイートを確認する権利がありません";
 				case 185: return "ユーザーは、日のツイート投稿限度を超えています";
 				case 187: return "ツイートが多重しています";
+				case 193: return "アップロードされたメディアの容量が大きすぎます";
 				case 215: return "認証データが誤っています";
 				case 231: return "ユーザーがログインを確認する必要があります";
 				case 251: return "このエンドポイントは廃止されました。";
 				case 261: return "アプリケーションは、書き込み動作を実行できません。";
-				default: return string.Empty;
+				default: return sub;
 			}
 		}
 	}

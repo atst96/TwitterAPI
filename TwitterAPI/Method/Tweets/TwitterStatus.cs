@@ -282,7 +282,10 @@ namespace TwitterAPI
         /// <returns></returns>
         public static TwitterResponse<TwitterStatus> Update(string Tweet, OAuthTokens tokens, StatusUpdateOptions options = null)
         {
-            return TwitterStatusCommand.Update(Tweet, tokens, options);
+			var url = UrlBank.StatusesUpdate;
+
+			var data = "status=" + Method.UrlEncode(Tweet);
+			return new TwitterResponse<TwitterStatus>(Method.GenerateResponseResult(Method.GenerateWebRequest(url, WebMethod.POST, tokens, options, "application/x-www-form-urlencoded", data, UTF8Encoding.UTF8.GetBytes(data))));
         }
 
 
@@ -297,7 +300,55 @@ namespace TwitterAPI
 		public static TwitterResponse<TwitterStatus> UpdateWithMedia
 			(string Tweet, byte[] content, OAuthTokens tokens, StatusUpdateOptions options = null)
 		{
-			return TwitterStatusCommand.UpdateWithMedia(Tweet, content, tokens, options);
+			var url = UrlBank.StatusesUpdateWithMedia;
+
+			var boundary = Guid.NewGuid().ToString();
+
+			var header = string.Format("--{0}", boundary);
+			var footer = string.Format("--{0}--", boundary);
+
+			var ContentType = "multipart/form-data;boundary=" + boundary;
+
+			/*--------------------  送信するデータの生成  --------------------*/
+
+			var encoding = Encoding.GetEncoding("iso-8859-1");
+
+			var fileData = encoding.GetString(content);
+
+
+			var builder = new StringBuilder();
+
+			// ヘッダーを書き込む
+			builder.AppendLine(header);
+			builder.AppendLine(string.Format("Content-Disposition: form-data; name=\"{0}\"", "status"));
+			builder.AppendLine();
+			builder.AppendLine();
+
+			// 投稿内容をUTF-8で書き込む(日本語文字化け回避)
+			builder.AppendLine(encoding.GetString(Encoding.GetEncoding("UTF-8").GetBytes(Tweet)));
+
+			// ファイル情報、フッターを書き込む
+			builder.AppendLine();
+			builder.AppendLine(header);
+			builder.AppendLine(string.Format("Content-Disposition: form-data; name=\"{0}\"; filename=\"{1}\"", "media[]", string.Format("image-{0}.png", DateTime.Now.ToString("yyyyMMddHHmmss"))));
+			builder.AppendLine("Content-Type: application/octet-stream");
+			builder.AppendLine();
+			builder.AppendLine(fileData);
+			builder.AppendLine(footer);
+
+			return new TwitterResponse<TwitterStatus>(Method.GenerateResponseResult(Method.GenerateWebRequest(url, WebMethod.POST, tokens, options, ContentType, null, encoding.GetBytes(builder.ToString()))));
+		}
+
+
+		/// <summary>
+		/// ツイートを取得
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="tokens"></param>
+		/// <returns></returns>
+		public static TwitterResponse<TwitterStatus> Show(decimal id, OAuthTokens tokens)
+		{
+			return new TwitterResponse<TwitterStatus>(Method.Get(string.Format(UrlBank.StatusesShow, id), tokens));
 		}
 
         /// <summary>
@@ -307,7 +358,7 @@ namespace TwitterAPI
         /// <param name="Id">StatudId</param>
         public static TwitterResponse<TwitterStatus> Destroy(OAuthTokens tokens, decimal Id)
         {
-            return TwitterStatusCommand.Destroy(tokens, Id);
+			return new TwitterResponse<TwitterStatus>(Method.Post(string.Format(UrlBank.StatusesDestroy, Id), tokens, null, null, null, null));
         }
 
 
@@ -318,7 +369,7 @@ namespace TwitterAPI
         /// <param name="id">StatusId</param>
         public static TwitterResponse<TwitterStatus> Retweet(OAuthTokens tokens, decimal id)
         {
-            return TwitterStatusCommand.Retweet(id, tokens);
+			return new TwitterResponse<TwitterStatus>(Method.Post(string.Format(UrlBank.StatusesRetweet, id), tokens, null, null, null, null));
         }
 
 
@@ -330,9 +381,23 @@ namespace TwitterAPI
         /// <returns></returns>
         public static TwitterResponse<TwitterStatus> DestroyRetweet(OAuthTokens tokens, decimal id)
         {
-            return TwitterStatusCommand.DestroyRetweet(id, tokens);
+			return new TwitterResponse<TwitterStatus>(Method.Post(string.Format(UrlBank.StatusesDestroy, id), tokens, null, null, null, null));
         }
 
+		public class StatusesShowOption : ParameterClass
+		{
+			[Parameters("id")]
+			public decimal Id { get; set; }
+
+			[Parameters("trim_user")]
+			public bool? TrimUser { get; set; }
+
+			[Parameters("include_entities")]
+			public bool? IncludeEntities { get; set; }
+
+			[Parameters("include_my_retweet")]
+			public bool? IncludeMyRetweet { get; set; }
+		}
 
     }
 

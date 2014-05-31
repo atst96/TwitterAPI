@@ -230,27 +230,116 @@ namespace TwitterAPI
                         {
                             while (!StreamStop && !reader.EndOfStream)
                             {
-
                                 var data = reader.ReadLine();
 
 								ThreadPool.QueueUserWorkItem(_ =>
 								{
 									if (!StreamStop && !string.IsNullOrEmpty(data))
 									{
-										System.Diagnostics.Debug.WriteLine(data);
+										if (Regex.IsMatch(data, @"""event""\s*:\s*\""(.+?)""") && eventCallback != null)
+										{
+											// Events
 
-										JObject obj = (JObject)JsonConvert.DeserializeObject(data);
+											JObject obj = (JObject)JsonConvert.DeserializeObject(data);
+											var events = obj.SelectToken("event", false);
+											if (eventCallback != null)
+											{
+												var _event = JsonConvert.DeserializeObject<StreamEventStatus>(data);
 
-										var friends = obj.SelectToken("friends", false);
+												var targetobject = obj.SelectToken("target_object", false);
+
+												/*TwitterStatus _targetObject = null;
+												TwitterList listObject = null;*/
+
+												if (targetobject != null)
+												{
+
+													if (targetobject.SelectToken("subscriver_couont", false) != null)
+													{
+														//System.Windows.Forms.MessageBox.Show(targetobject.ToString());
+														//_targetObject = JsonConvert.DeserializeObject<TwitterStatus>(targetobject.ToString());
+													}
+													else if (events.ToString().Contains("list_"))
+													{
+														//listObject = JsonConvert.DeserializeObject<TwitterList>(targetobject.ToString());
+														_event.TargetObject_List = JsonConvert.DeserializeObject<TwitterList>(targetobject.ToString());
+													}
+													else if (targetobject.SelectToken("user", false) != null)
+													{
+														//_targetObject = JsonConvert.DeserializeObject<TwitterStatus>(targetobject.ToString());
+														_event.TargetObject = JsonConvert.DeserializeObject<TwitterStatus>(targetobject.ToString());
+													}
+
+												}
+
+												//_event.TargetObject = _targetObject;
+												//_event.TargetObject_List = listObject;
+												this.eventCallback(_event);
+												_event = null;
+												targetobject = null;
+												obj = null;
+												events = null;
+											}
+										}
+										else if (Regex.IsMatch(data, @"""user""\s*:\s*\{") && Regex.IsMatch(data, @"""entities""\s*:\s*\{") && !Regex.IsMatch(data, @"""event""\s*:\s*""") && statusCreatedCallback != null)
+										{
+											// Status
+											var _data = JsonConvert.DeserializeObject<TwitterStatus>(data);
+											statusCreatedCallback(_data);
+											_data = null;
+										}
+										else if (Regex.IsMatch(data, @"^\{\s*""delete"":") && (statusDeletedCallback != null || directMessageDeletedCallback != null))
+										{
+											var delete = ((JObject)JsonConvert.DeserializeObject(data)).SelectToken("delete", false);
+											if (Regex.IsMatch(delete.ToString(), @"""status""\s*:\s*\{"))
+											{
+												// Delete Status
+												if (statusDeletedCallback != null)
+												{
+													var _data = JsonConvert.DeserializeObject<TwitterDeletedStatus>(delete.SelectToken("status", false).ToString());
+													statusDeletedCallback(_data);
+													_data = null;
+												}
+											}
+											else if (Regex.IsMatch(delete.ToString(), @"""direct_message""\s*:\s*\{"))
+											{
+												// Delete DirectMessage
+												if (directMessageDeletedCallback != null)
+												{
+													var _data = (JsonConvert.DeserializeObject<TwitterDeletedStatus>(delete.SelectToken("direct_message", false).ToString()));
+													directMessageDeletedCallback(_data);
+													_data = null;
+												}
+											}
+										}
+										else if (Regex.IsMatch(data, @"^\{\s*""direct_message"":") && directMessageCreatedCallback != null)
+										{
+											// DirectMessage
+											var _data = JsonConvert.DeserializeObject<TwitterDirectMessage>(((JObject)JsonConvert.DeserializeObject(data)).SelectToken("direct_message", false).ToString());
+											directMessageCreatedCallback(_data);
+											_data = null;
+										}
+										else if (Regex.IsMatch(data, @"^\{\s*""friends"":") && friendCallback != null)
+										{
+											// FriendIds
+											var _data = JsonConvert.DeserializeObject<FriendsList>(data);
+											friendCallback(_data);
+										}
+
+										// JObject obj = (JObject)JsonConvert.DeserializeObject(data);
+										// System.Diagnostics.Debug.WriteLine(data);
+
+										/*var friends = obj.SelectToken("friends", false);
 										if (friends != null)
 										{
+
 											if (friendCallback != null && friends.HasValues)
 											{
 												friendCallback(JsonConvert.DeserializeObject<FriendsList>(data));
 											}
-										}
+										}*/
 
-										var delete = obj.SelectToken("delete", false);
+										/*var delete = obj.SelectToken("delete", false);
 										if (delete != null)
 										{
 											var deletedStatus = delete.SelectToken("status", false);
@@ -264,68 +353,30 @@ namespace TwitterAPI
 
 											//var deletedDirectMessage = delete.SelectToken("direct_message", false);
 
-										}
+										}*/
 
 
-										try
-										{
-											var events = obj.SelectToken("event", false);
-											if (eventCallback != null && events != null)
-											{
-												var _event = JsonConvert.DeserializeObject<StreamEventStatus>(data);
+										
 
-												var targetobject = obj.SelectToken("target_object", false);
-
-												TwitterStatus _targetObject = null;
-												TwitterList listObject = null;
-
-												if (targetobject != null)
-												{
-
-													if (targetobject.SelectToken("subscriver_couont", false) != null)
-													{
-														//System.Windows.Forms.MessageBox.Show(targetobject.ToString());
-														//_targetObject = JsonConvert.DeserializeObject<TwitterStatus>(targetobject.ToString());
-													}
-													else if (events.ToString().Contains("list_"))
-													{
-														listObject = JsonConvert.DeserializeObject<TwitterList>(targetobject.ToString());
-													}
-													else if (targetobject.SelectToken("user", false) != null)
-													{
-														_targetObject = JsonConvert.DeserializeObject<TwitterStatus>(targetobject.ToString());
-													}
-
-												}
-
-												_event.TargetObject = _targetObject;
-												_event.TargetObject_List = listObject;
-												this.eventCallback(_event);
-											}
-										}
-										catch (Exception ex)
-										{
-											System.Diagnostics.Debug.WriteLine(ex);
-										}
-
-										var user = obj.SelectToken("user", false);
+										/*var user = obj.SelectToken("user", false);
 										if (user != null)
 										{
 											if (statusCreatedCallback != null && user.HasValues)
 											{
 												statusCreatedCallback(JsonConvert.DeserializeObject<TwitterStatus>(data));
 											}
-										}
+										}*/
 
-										var directMessage = obj.SelectToken("direct_message", false);
+										/*var directMessage = obj.SelectToken("direct_message", false);
 										if (directMessage != null)
 										{
 											if (directMessageCreatedCallback != null && directMessage.HasValues)
 											{
 												directMessageCreatedCallback(JsonConvert.DeserializeObject<TwitterDirectMessage>(directMessage.ToString()));
 											}
-										}
+										}*/
 									}
+									data = null;
 								});
                             }
 

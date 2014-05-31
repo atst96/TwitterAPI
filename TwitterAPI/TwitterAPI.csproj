@@ -117,7 +117,6 @@
     <Compile Include="Method\TwitterFriends.cs" />
     <Compile Include="Method\Method.cs" />
     <Compile Include="Method\TwitterTrends.cs" />
-    <Compile Include="Method\Tweets\TwitterStatusCommand.cs" />
     <Compile Include="Method\Tweets\UpdateImage.cs" />
     <Compile Include="OAuthUtility\OAuth.cs" />
     <Compile Include="Options.cs" />
