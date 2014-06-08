@@ -140,7 +140,7 @@ namespace TwitterAPI
 		/// <summary>
 		/// GET direct_messages/show
 		/// </summary>
-		public static readonly string DirectMessageShow = "https://api.twitter.com/1.1/direct_messages/show.json";
+		public static readonly string DirectMessageShow = "https://api.twitter.com/1.1/direct_messages/show.json?id={0}";
 		
 		/// <summary>
 		/// POST direct_messages/destroy 

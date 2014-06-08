@@ -75,6 +75,7 @@ namespace TwitterAPI
 			if (method == WebMethod.GET)
 			{
 				signature = oauth.GenerateSignature(new Uri(addr), tokens.ConsumerKey, tokens.ConsumerSecret, tokens.AccessToken, tokens.AccessTokenSecret, "GET", timestamp, nonce, out normalizedUrl, out normalizedReqParams);
+				System.Diagnostics.Debug.WriteLine(normalizedReqParams);
 				req = HttpWebRequest.Create(string.Format("{0}?{1}&oauth_signature={2}", normalizedUrl, normalizedReqParams, Uri.EscapeDataString(signature))) as HttpWebRequest;
 
 				if (parameters != null)
@@ -98,10 +99,12 @@ namespace TwitterAPI
 				if (!string.IsNullOrEmpty(contentType)) req.ContentType = contentType;
 
 				if (data != null) using (Stream stream = req.GetRequestStream()) stream.Write(data, 0, data.Length);
+
+				System.Diagnostics.Debug.WriteLine(req.Headers);
 			}
 
+
 			ServicePointManager.Expect100Continue = false;
-			//req.Proxy = proxy;
 
 			return req;
 		}
@@ -181,83 +184,83 @@ namespace TwitterAPI
         }
 
 
-		public static ResponseResult xAuthOAuthGet(string url, OAuthTokens tokens, string username, string password, Dictionary<string, string> param = null, string mode = "client_auth")
-		{
-			var oauth = new OAuthBase();
+		//public static ResponseResult xAuthOAuthGet(string url, OAuthTokens tokens, string username, string password, Dictionary<string, string> param = null, string mode = "client_auth")
+		//{
+		//	var oauth = new OAuthBase();
 
-			// タイムスタンプの生成
-			var timestamp = oauth.GenerateTimeStamp();
+		//	// タイムスタンプの生成
+		//	var timestamp = oauth.GenerateTimeStamp();
 
-			// nonceの生成
-			var nonce = oauth.GenerateNonce();
+		//	// nonceの生成
+		//	var nonce = oauth.GenerateNonce();
 
-			string normalizedUrl, normalizedReqParams;
+		//	string normalizedUrl, normalizedReqParams;
 
-			// DictionaryをURLのパラメータに変換
-			if (param != null)
-			{
-				url += ConvertMethod.DictionaryToParams(param);
-			}
+		//	// DictionaryをURLのパラメータに変換
+		//	if (param != null)
+		//	{
+		//		url += ConvertMethod.DictionaryToParams(param);
+		//	}
 
-			// シグネチャの生成
-			string signature = oauth.GenerateSignature(new Uri(url),
-				tokens.ConsumerKey, tokens.ConsumerSecret, tokens.AccessToken, tokens.AccessTokenSecret,
-				"GET", timestamp, nonce, out normalizedUrl, out normalizedReqParams);
+		//	// シグネチャの生成
+		//	string signature = oauth.GenerateSignature(new Uri(url),
+		//		tokens.ConsumerKey, tokens.ConsumerSecret, tokens.AccessToken, tokens.AccessTokenSecret,
+		//		"GET", timestamp, nonce, out normalizedUrl, out normalizedReqParams);
 
-			string requestUrl = string.Format("{0}?{1}&oauth_signature={2}",
-				normalizedUrl, normalizedReqParams, Uri.EscapeDataString(signature));
+		//	string requestUrl = string.Format("{0}?{1}&oauth_signature={2}",
+		//		normalizedUrl, normalizedReqParams, Uri.EscapeDataString(signature));
 
-			var req = WebRequest.Create(requestUrl);
+		//	var req = WebRequest.Create(requestUrl);
 
-			var result = new ResponseResult();
+		//	var result = new ResponseResult();
 
-			try
-			{
-				var res = req.GetResponse();
-				var reader = new StreamReader(res.GetResponseStream());
-				result.ResponseStream = reader.ReadToEnd();
-				result.Result = StatusResult.Success;
+		//	try
+		//	{
+		//		var res = req.GetResponse();
+		//		var reader = new StreamReader(res.GetResponseStream());
+		//		result.ResponseStream = reader.ReadToEnd();
+		//		result.Result = StatusResult.Success;
 
-				result.AccessLevel = StringToLevelEnum(res.Headers["x-access-level"]);
-				result.RateLimited = new RateLimited(res.Headers["x-rate-limit-limit"],
-					res.Headers["x-rate-limig-remaining"], res.Headers["x-rate-limit-reset"]);
+		//		result.AccessLevel = StringToLevelEnum(res.Headers["x-access-level"]);
+		//		result.RateLimited = new RateLimited(res.Headers["x-rate-limit-limit"],
+		//			res.Headers["x-rate-limig-remaining"], res.Headers["x-rate-limit-reset"]);
 
-				result.Url = res.ResponseUri.ToString();
+		//		result.Url = res.ResponseUri.ToString();
 
-				res.Close();
-			}
-			catch (WebException ex)
-			{
-				result.Result = GetStatusResult(ex.Status);
-				result.ResponseStream = null;
-				using (var reader = new StreamReader(ex.Response.GetResponseStream()))
-				{
-					var obj = (JObject)JsonConvert.DeserializeObject(reader.ReadToEnd());
-					var errors = obj.SelectToken("errors", false);
-					if (errors != null)
-					{
-						if (errors.Type == JTokenType.String)
-						{
-							result.Error = new TwitterError();
-							result.Error.Message = errors.ToString();
-						}
-						else if (errors.Type == JTokenType.Array)
-						{
-							result.Error = new TwitterError();
-							result.Error = JsonConvert.DeserializeObject<List<TwitterError>>(errors.ToString())[0];
-						}
+		//		res.Close();
+		//	}
+		//	catch (WebException ex)
+		//	{
+		//		result.Result = GetStatusResult(ex.Status);
+		//		result.ResponseStream = null;
+		//		using (var reader = new StreamReader(ex.Response.GetResponseStream()))
+		//		{
+		//			var obj = (JObject)JsonConvert.DeserializeObject(reader.ReadToEnd());
+		//			var errors = obj.SelectToken("errors", false);
+		//			if (errors != null)
+		//			{
+		//				if (errors.Type == JTokenType.String)
+		//				{
+		//					result.Error = new TwitterError();
+		//					result.Error.Message = errors.ToString();
+		//				}
+		//				else if (errors.Type == JTokenType.Array)
+		//				{
+		//					result.Error = new TwitterError();
+		//					result.Error = JsonConvert.DeserializeObject<List<TwitterError>>(errors.ToString())[0];
+		//				}
 
-					}
-				}
-				result.AccessLevel = StringToLevelEnum(ex.Response.Headers["x-access-level"]);
-				result.RateLimited = new RateLimited(ex.Response.Headers["x-rate-limit-limit"],
-					ex.Response.Headers["x-rate-limit-remaining"], ex.Response.Headers["x-rate-limit-reset"]);
-				result.Url = ex.Response.ResponseUri.ToString();
+		//			}
+		//		}
+		//		result.AccessLevel = StringToLevelEnum(ex.Response.Headers["x-access-level"]);
+		//		result.RateLimited = new RateLimited(ex.Response.Headers["x-rate-limit-limit"],
+		//			ex.Response.Headers["x-rate-limit-remaining"], ex.Response.Headers["x-rate-limit-reset"]);
+		//		result.Url = ex.Response.ResponseUri.ToString();
 
-			}
+		//	}
 
-			return result;
-		}
+		//	return result;
+		//}
 
 		public static ResponseResult Post(string url, OAuthTokens tokens, ParameterClass parameters, string contentType, string postHeader, byte[] data)
 		{
@@ -482,7 +485,7 @@ namespace TwitterAPI
             return param.Count > 0 ? "?" + string.Join("&", param) : string.Empty;
         }
 
-		public string GenerateParameters(string paramName)
+		public string GenerateParameters(string paramName, bool AddFirstmark = true)
 		{
 			var param = new List<string>();
 
@@ -511,7 +514,7 @@ namespace TwitterAPI
 					}
 				}
 			}
-			return param.Count > 0 ? "?" + string.Join("&", param) : string.Empty;
+			return param.Count > 0 ? (AddFirstmark ? "?" + string.Join("&", param) : string.Join("&", param)) : string.Empty;
 		}
 
         /// <summary>
