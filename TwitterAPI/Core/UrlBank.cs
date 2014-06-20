@@ -5,7 +5,7 @@ using System.Text;
 
 namespace TwitterAPI
 {
-    public abstract class UrlBank
+    internal class UrlBank
     {
         //   Timelines
 

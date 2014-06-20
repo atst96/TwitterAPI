@@ -10,155 +10,7 @@ using Newtonsoft.Json.Converters;
 namespace TwitterAPI
 {
 
-    [DataContract]
-    public class TwitterUser
-    {
-        [DataMember(Name = "id")]
-        public decimal Id { get; set; }
-
-        [DataMember(Name = "id_str")]
-        public string StringId { get; set; }
-
-        [DataMember(Name = "name")]
-        public string Name { get; set; }
-
-        [DataMember(Name = "screen_name")]
-        public string ScreenName { get; set; }
-
-        [DataMember(Name = "location")]
-        public string Location { get; set; }
-
-        [DataMember(Name = "description")]
-        public string Description { get; set; }
-
-        [DataMember(Name = "url")]
-        public string Url { get; set; }
-
-		[DataMember(Name = "entities", IsRequired = false)]
-		public user_entities Entities { get; set; }
-
-		[DataContract]
-		public class user_entities
-		{
-			[DataMember(Name = "url")]
-			public TwitterUser_Urls Url { get; set; }
-
-			[DataMember(Name = "description")]
-			public TwitterUser_Urls Description { get; set; }
-
-			[DataContract]
-			public class TwitterUser_Urls
-			{
-				[DataMember(Name = "urls")]
-				public List<TwitterStatus.TweetEntities.Entities_Urls> Urls { get; set; }
-			}
-		}
-
-        [DataMember(Name = "protected")]
-        public bool Protected { get; set; }
-
-        [DataMember(Name = "followers_count")]
-        public int FollowersCount { get; set; }
-
-        [DataMember(Name = "friends_count")]
-        public int FriendsCount { get; set; }
-
-        [DataMember(Name = "listed_count")]
-        public int? ListedCount { get; set; }
-
-        [DataMember(Name = "created_at")]
-        private string created_at { get; set; }
-
-        public DateTime CreateDate { get { return DateTime.ParseExact(created_at, "ddd MMM dd HH':'mm':'ss zz'00' yyyy", System.Globalization.DateTimeFormatInfo.InvariantInfo, System.Globalization.DateTimeStyles.None); } }
-
-        [DataMember(Name = "favourites_count")]
-        public decimal FavoritesCount { get; set; }
-
-        [DataMember(Name = "utc_offset")]
-        public string UtcOffset { get; set; }
-
-        [DataMember(Name = "time_zone")]
-        public string TimeZone { get; set; }
-
-        [DataMember(Name = "geo_enabled")]
-        public bool GetEnabled { get; set; }
-
-        [DataMember(Name = "verified")]
-        public bool Verified { get; set; }
-
-        [DataMember(Name = "statuses_count")]
-        public decimal StatusCount { get; set; }
-
-        [DataMember(Name = "lang")]
-        public string Language { get; set; }
-
-        [DataMember(Name = "contributors_enabled")]
-        public bool ContributorsEnabled { get; set; }
-
-        [DataMember(Name = "is_translator")]
-        public bool IsTranslator { get; set; }
-
-        [DataMember(Name = "profile_background_color")]
-        private string profile_background_color { get; set; }
-
-        public Color ProfileBackgroundColor { get { return ColorTranslator.FromHtml("#" + profile_background_color); } }
-
-        [DataMember(Name = "profile_background_image_url")]
-        public string ProfileBackgroundImageUrl { get; set; }
-
-        [DataMember(Name = "profile_background_image_url_https")]
-        public string ProfileBackgroundImageUrl_Https { get; set; }
-
-        [DataMember(Name = "profile_background_tile")]
-        public bool ProfileBackgroundTile { get; set; }
-
-        [DataMember(Name = "profile_image_url")]
-        public string ProfileImageUrl { get; set; }
-
-        [DataMember(Name = "profile_image_url_https")]
-        public string ProfileImageUrl_Https { get; set; }
-
-		[DataMember(Name = "profile_banner_url")]
-		public string ProfileBannerUrl { get; set; }
-		
-		[DataMember(Name = "profile_link_color")]
-        private string profile_link_color { get; set; }
-
-        public Color ProfileLinkColor { get { return ColorTranslator.FromHtml("#" + profile_link_color); } }
-
-        [DataMember(Name = "profile_sidebar_border_color")]
-        private string profile_sidebar_border_color { get; set; }
-
-        public Color ProfileSidebarBorderColor { get { return ColorTranslator.FromHtml("#" + profile_sidebar_border_color); } }
-
-        [DataMember(Name = "profile_sidebar_fill_color")]
-        private string profile_sidebar_fill_color { get; set; }
-
-        public Color ProfileSidebarFillColor { get { return ColorTranslator.FromHtml("#" + profile_sidebar_fill_color); } }
-
-        [DataMember(Name = "profile_text_color")]
-        private string profile_text_color { get; set; }
-
-        public Color ProfileTextColor { get { return ColorTranslator.FromHtml("#" + profile_text_color); } }
-
-        [DataMember(Name = "profile_use_background_image")]
-        public bool ProfileUseBackgroundImag { get; set; }
-
-        [DataMember(Name = "default_profile")]
-        public bool DefaultProfile { get; set; }
-
-        [DataMember(Name = "default_profile_image")]
-        public bool DefaultProfileImage { get; set; }
-
-        [DataMember(Name = "following")]
-        public bool? Following { get; set; }
-
-        [DataMember(Name = "follow_request_sent")]
-        public bool? FollowRequestSend { get; set; }
-
-        [DataMember(Name = "notifications")]
-        public bool? Notifications { get; set; }
-    }
+    
 
     [DataContract]
     public class TwitterUserCollection : List<TwitterUser> { }    
@@ -491,4 +343,64 @@ namespace TwitterAPI
 	}
 
 	public class TwitterListCollection : List<TwitterList> { }
+
+	[DataContract]
+	public class TwitterSettings
+	{
+		[DataMember(Name = "always_use_https")]
+		public bool AlwaysUseHttps { get; set; }
+
+		[DataMember(Name = "discoverable_by_email")]
+		public bool DiscoverableByEmail { get; set; }
+
+		[DataMember(Name = "geo_enabled")]
+		public bool IsGeoEnabled { get; set; }
+
+		[DataMember(Name = "language")]
+		public string Language { get; set; }
+
+		[DataMember(Name = "protected")]
+		public bool Protected { get; set; }
+
+		[DataMember(Name = "screen_name")]
+		public string ScreenName { get; set; }
+
+		[DataMember(Name = "show_all_inline_media")]
+		public bool ShowAllInlineMedia { get; set; }
+
+		[DataMember(Name = "time_zone")]
+		public TimeZone TimeZone { get; set; }
+
+		[DataMember(Name = "trend_location")]
+		public List<TwitterTrendWoeId> TrendeLocation { get; set; }
+
+		[DataMember(Name = "use_cookie_personalization")]
+		public bool UseCookiePersonalization { get; set; }
+	}
+
+	[DataContract]
+	public class SleepTime
+	{
+		[DataMember(Name = "enabled")]
+		public bool? IsEnabled { get; set; }
+
+		[DataMember(Name = "end_time")]
+		public string EndTime { get; set; }
+
+		[DataMember(Name = "start_time")]
+		public string StartTime { get; set; }
+	}
+
+	[DataContract]
+	public class TimeZone
+	{
+		[DataMember(Name = "name")]
+		public string Name { get; set; }
+
+		[DataMember(Name = "tzinfo_name")]
+		public string TzinfoName { get; set; }
+
+		[DataMember(Name = "utc_offset")]
+		public int UtcOffset { get; set; }
+	}
 }

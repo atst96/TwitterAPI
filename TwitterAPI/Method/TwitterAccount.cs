@@ -8,6 +8,11 @@ namespace TwitterAPI
     public abstract partial class TwitterAccount
     {
 
+		public static TwitterResponse<TwitterSettings> Settings(OAuthTokens tokens)
+		{
+			return new TwitterResponse<TwitterSettings>(Method.Get(UrlBank.AccountSettings, tokens));
+		}
+
 		public static TwitterResponse<TwitterUser> VerifyCredentials(OAuthTokens tokens)
 		{
 			return new TwitterResponse<TwitterUser>(Method.Get(UrlBank.AccountVerifyCredentails, tokens));
@@ -18,22 +23,7 @@ namespace TwitterAPI
 			return new TwitterResponse<TwitterUser>(Method.Post(UrlBank.AccountUpdateProfile, tokens, option, "application/x-www-form-urlencoded", null, null));
 		}
 
-		public static TwitterResponse<TwitterUser> Show(OAuthTokens tokens, UsersShowOption option)
-		{
-			return new TwitterResponse<TwitterUser>(Method.Get(UrlBank.UsersShow, tokens, option));
-		}
-
-		public class UsersShowOption : ParameterClass
-		{
-			[Parameters("user_id")]
-			public decimal? UserId { get; set; }
-
-			[Parameters("screen_name")]
-			public string ScreenName { get; set; }
-
-			[Parameters("include_entities")]
-			public bool? IncludeEntities { get; set; }
-		}
+		
 
 		public class UpdateProfileOption : ParameterClass
 		{
