@@ -384,6 +384,16 @@ namespace TwitterAPI
 			return new TwitterResponse<TwitterStatus>(Method.Post(string.Format(UrlBank.StatusesDestroy, id), tokens, null, null, null, null));
         }
 
+		public static TwitterResponse<TwitterStatusCollection> Retweets(OAuthTokens tokens, decimal StatusId, RetweetsOption option = null)
+		{
+			return new TwitterResponse<TwitterStatusCollection>(Method.Get(string.Format(UrlBank.StatusesRetweets, StatusId), tokens, option));
+		}
+
+		public static TwitterResponse<UserIds> Retweeters(OAuthTokens tokens, decimal StatusId, CursorOption option = null)
+		{
+			return new TwitterResponse<UserIds>(Method.Get(string.Format("{0}?id={1}&stringify_ids=false", UrlBank.StatusesRetweeters, StatusId), tokens, null));
+		}
+
 		public class StatusesShowOption : ParameterClass
 		{
 			[Parameters("id")]
@@ -399,6 +409,35 @@ namespace TwitterAPI
 			public bool? IncludeMyRetweet { get; set; }
 		}
 
+		public class RetweetsOption : ParameterClass
+		{
+			[Parameters("count")]
+			public int? Count { get; set; }
+
+			[Parameters("trim_user")]
+			public bool? TrimUser { get; set; }
+		}
+
+		public class OembedOption : ParameterClass
+		{
+			[Parameters("maxwidth")]
+			public int? MaxWidth { get; set; }
+
+			[Parameters("hide_media")]
+			public bool? HideMedia { get; set; }
+
+			[Parameters("hide_thread")]
+			public bool? HideThread { get; set; }
+
+			[Parameters("omit_script")]
+			public bool? OmitScript { get; set; }
+
+			[Parameters("related")]
+			public StringArray Related { get; set; }
+
+			[Parameters("lang")]
+			public string Language { get; set; }
+		}
     }
 
     public class TwitterStatusCollection : List<TwitterStatus> { }

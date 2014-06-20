@@ -20,18 +20,19 @@
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
+    <ErrorReport>none</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
+    <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
+    <ErrorReport>none</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Itanium'">
     <DebugSymbols>true</DebugSymbols>
@@ -106,7 +107,7 @@
     <Compile Include="Method\TwitterAccount.cs" />
     <Compile Include="Collection.cs" />
     <Compile Include="Method\DirectMessages\DirectMessage.cs" />
-    <Compile Include="Core\ITwitterObject.cs" />
+    <Compile Include="Core\TwitterObject.cs" />
     <Compile Include="Core\OAuthBase.cs" />
     <Compile Include="Core\StatusResult.cs" />
     <Compile Include="Core\TwitterError.cs" />

@@ -182,7 +182,7 @@ namespace TwitterAPI
 		/// <summary>
 		/// GET friendships/outgoing 
 		/// </summary>
-		public static readonly string FriendshiptsOutgoing = "https://api.twitter.com/1.1/friendships/outgoing.format";
+		public static readonly string FriendshiptsOutgoing = "https://api.twitter.com/1.1/friendships/outgoing.json";
 		
 		/// <summary>
 		/// POST friendships/create 

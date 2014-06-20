@@ -10,6 +10,14 @@ namespace TwitterAPI
     public abstract partial class TwitterFriendships
     {
 
+		/// <summary>
+		/// リツイートを非表示にしているユーザー一覧を表示します
+		/// </summary>
+		public static TwitterResponse<List<decimal>> NoRetweetsIds(OAuthTokens tokens)
+		{
+			return new TwitterResponse<List<decimal>>(Method.Get(string.Format("{0}?stringify_ids=false", UrlBank.FriendshipsNoRetweetsIds), tokens));
+		}
+
 		public static TwitterResponse<FriendsIds> FriendsIds(OAuthTokens tokens, int Cursor = 0)
 		{
 			return new TwitterResponse<FriendsIds>(Method.Get(UrlBank.FriendsIds, tokens));
@@ -18,6 +26,16 @@ namespace TwitterAPI
 		public static TwitterResponse<FriendsIds> FollowersIds(OAuthTokens tokens, int Cursor = 0)
 		{
 			return new TwitterResponse<FriendsIds>(Method.Get(UrlBank.FollowersIds, tokens));
+		}
+
+		public static TwitterResponse<UserIds> Incoming(OAuthTokens tokens, CursorOption option = null)
+		{
+			return new TwitterResponse<UserIds>(Method.Get(string.Format("{0}?stringify_ids=false", UrlBank.FriendshipsIncoming), tokens));
+		}
+
+		public static TwitterResponse<UserIds> Outgoing(OAuthTokens tokens, CursorOption option = null)
+		{
+			return new TwitterResponse<UserIds>(Method.Get(string.Format("{0}?stringify_ids=false", UrlBank.FriendshiptsOutgoing), tokens));
 		}
 
 		public static TwitterResponse<TwitterUser> Create(OAuthTokens tokens, decimal UserId, bool Follow = true)
@@ -42,6 +60,11 @@ namespace TwitterAPI
 		{
 			var data = string.Format("screen_name={0}", ScreenName);
 			return new TwitterResponse<TwitterUser>(Method.Post(UrlBank.FriendshipsDestroy, tokens, null, "application/x-www-form-urlencoded", data, Encoding.UTF8.GetBytes(data)));
+		}
+
+		public static TwitterResponse<TwitterUserCollection> FriendsList(OAuthTokens tokens)
+		{
+			return new TwitterResponse<TwitterUserCollection>(Method.Get(UrlBank.FriendsList, tokens));
 		}
 
 		public static TwitterResponse<TwitterUserCollection> FollowersList(OAuthTokens tokens)

@@ -12,10 +12,12 @@ namespace TwitterAPI
     public static partial class TwitterTimeline
     {
 
-        private static TwitterResponse<TwitterStatusCollection> GetTimeline(string Url, OAuthTokens tokens, TimelineOptions options = null)
-        {
-                return new TwitterResponse<TwitterStatusCollection>(Method.Get(Url, tokens, options));
-        }
+		private static TwitterResponse<TwitterStatusCollection> GetTimeline(string Url, OAuthTokens tokens, TimelineOptions options = null)
+		{
+			var res = new TwitterResponse<TwitterStatusCollection>(Method.Get(Url, tokens, options));
+			System.Diagnostics.Debug.WriteLine(res.ToString().Contains("extended"));
+			return res;
+		}
 
 		/// <summary>
 		/// UserTimelineの取得
