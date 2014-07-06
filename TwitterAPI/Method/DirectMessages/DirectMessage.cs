@@ -20,6 +20,19 @@ namespace TwitterAPI
 		[DataMember(Name = "id")]
 		public decimal Id { get; set; }
 
+		[DataMember(Name = "created_at")]
+		private string created_at { get; set; }
+
+		public DateTime CreateDate
+		{
+			get
+			{
+				return DateTime.ParseExact(created_at, "ddd MMM dd HH':'mm':'ss zz'00' yyyy",
+					System.Globalization.DateTimeFormatInfo.InvariantInfo,
+					System.Globalization.DateTimeStyles.None);
+			}
+		}
+
 		/// <summary>
 		/// ダイレクトメッセージのID(文字列)
 		/// </summary>
@@ -84,58 +97,26 @@ namespace TwitterAPI
 
 		public static TwitterResponse<TwitterDirectMessage> Destroy(OAuthTokens tokens, decimal id, bool IncludeEntities = false)
 		{
-			var data = string.Format("id={0}", id);
-			var __data__ = UTF8Encoding.UTF8.GetBytes(data);
-
-			#region test
-			var oauth = new OAuthBase();
-
-			string addr = UrlBank.DirectMessagesDestroy, timestamp = oauth.GenerateTimeStamp(), nonce = oauth.GenerateNonce(), normalizedUrl, normalizedReqParams, signature;
-
-
-			HttpWebRequest req = null;
-
-			// シグネチャ
-
-			req = HttpWebRequest.Create(addr) as HttpWebRequest;
-
-			string signatureBase = oauth.GenerateSignatureBase(new Uri(addr), tokens.ConsumerKey, tokens.AccessToken, tokens.AccessTokenSecret, "POST", timestamp, nonce, "HMAC-SHA1", out normalizedUrl, out normalizedReqParams)/* + (!string.IsNullOrEmpty(data) ? Uri.EscapeDataString("&" + data) : "")*/,
-				compositKey = string.Concat(Uri.EscapeDataString(tokens.ConsumerSecret), "&", Uri.EscapeDataString(tokens.AccessTokenSecret)), oauthSignature;
-			using (var hasher = new HMACSHA1(UTF8Encoding.UTF8.GetBytes(compositKey))) oauthSignature = Convert.ToBase64String(hasher.ComputeHash(UTF8Encoding.UTF8.GetBytes(signatureBase)));
-
-			signature = string.Format("OAuth {0}\", oauth_signature=\"{1}\"", normalizedReqParams.Replace("=", "=\"").Replace("&", "\", "), Uri.EscapeDataString(oauthSignature));
-			req.ContentType = "application/x-www-form-urlencoded";
-			req.Method = "POST";
-			req.Headers.Add(HttpRequestHeader.Authorization, signature);
-
-			if (data != null) using (Stream stream = req.GetRequestStream()) stream.Write(__data__, 0, __data__.Length);
-
-
-
-			ServicePointManager.Expect100Continue = false;
-
-			#endregion
-
-			return new TwitterResponse<TwitterDirectMessage>(Method.GenerateResponseResult(req));
-
-			/*var option = new DMDestroyOption { Id = id/*, IncludeEntities = IncludeEntities };
-			var data = string.Format("id={0}", id);
-			System.Diagnostics.Debug.WriteLine(data);
-			return new TwitterResponse<TwitterDirectMessage>(Method.Post("https://api.twitter.com/1.1/direct_messages/destroy.json?id=" + id
-				, tokens, null, "application/x-www-form-urlencoded", data, UTF8Encoding.UTF8.GetBytes(data)));*/
+			return new TwitterResponse<TwitterDirectMessage>(Method.GenerateResponseResult(Method.GenerateWebRequest(string.Format("{0}?id={1}", UrlBank.DirectMessagesDestroy, id), WebMethod.POST, tokens, null, "application/x-www-form-urlencoded", null, null)));
 		}
 
 		public static TwitterResponse<TwitterDirectMessage> New(OAuthTokens tokens, string ScreenName, string Text)
 		{
-			string data = string.Format("text={0}&screen_name={1}", Method.UrlEncode(Text), ScreenName);
-			System.Diagnostics.Debug.WriteLine(data);
-			return new TwitterResponse<TwitterDirectMessage>(Method.GenerateResponseResult(Method.GenerateWebRequest(
-				"https://api.twitter.com/1.1/direct_messages/new.json", WebMethod.POST, tokens, null, "application/x-www-form-urlencoded", data, UTF8Encoding.UTF8.GetBytes(data))));
+			string data = string.Format("text={0}&screen_name={1}", Uri.EscapeDataString(Text), Uri.EscapeDataString(ScreenName));
+
+			return new TwitterResponse<TwitterDirectMessage>(Method.GenerateResponseResult(Method.GenerateWebRequest("https://api.twitter.com/1.1/direct_messages/new.json?" + data, WebMethod.POST, tokens, null, "application/x-www-form-urlencoded", null, null)));
+		}
+
+		public static TwitterResponse<TwitterDirectMessage> New(OAuthTokens tokens, decimal UserId, string Text)
+		{
+			string data = string.Format("text={0}&screen_name={1}", Uri.EscapeDataString(Text), UserId);
+
+			return new TwitterResponse<TwitterDirectMessage>(Method.GenerateResponseResult(Method.GenerateWebRequest("https://api.twitter.com/1.1/direct_messages/new.json?" + data, WebMethod.POST, tokens, null, "application/x-www-form-urlencoded", null, null)));
 		}
 
 		private class DMDestroyOption : ParameterClass
 		{
-			[Parameters("id", "PostData")]
+			[Parameters("id",  ParameterMethodType.POSTData)]
 			public decimal Id { get; set; }
 
 			[Parameters("include_entities")]

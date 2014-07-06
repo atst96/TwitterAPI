@@ -75,12 +75,12 @@ namespace TwitterAPI
 			if (method == WebMethod.GET)
 			{
 				signature = oauth.GenerateSignature(new Uri(addr), tokens.ConsumerKey, tokens.ConsumerSecret, tokens.AccessToken, tokens.AccessTokenSecret, "GET", timestamp, nonce, out normalizedUrl, out normalizedReqParams);
-				System.Diagnostics.Debug.WriteLine(normalizedReqParams);
+
 				req = HttpWebRequest.Create(string.Format("{0}?{1}&oauth_signature={2}", normalizedUrl, normalizedReqParams, Uri.EscapeDataString(signature))) as HttpWebRequest;
 
 				if (parameters != null)
 				{
-					var param = parameters.GenerateParameters("bearer");
+					var param = parameters.GenerateParameters(ParameterMethodType.Bearer);
 					if (!string.IsNullOrEmpty(param))
 						req.Headers.Add(HttpRequestHeader.Authorization, param);
 				}
@@ -93,18 +93,23 @@ namespace TwitterAPI
 					compositKey = string.Concat(Uri.EscapeDataString(tokens.ConsumerSecret), "&", Uri.EscapeDataString(tokens.AccessTokenSecret)), oauthSignature;
 				using (var hasher = new HMACSHA1(UTF8Encoding.UTF8.GetBytes(compositKey))) oauthSignature = Convert.ToBase64String(hasher.ComputeHash(UTF8Encoding.UTF8.GetBytes(signatureBase)));
 
-				signature = string.Format("OAuth {0}\", oauth_signature=\"{1}\"", normalizedReqParams.Replace("=", "=\"").Replace("&", "\", "), Uri.EscapeDataString(oauthSignature));
+				signature = string.Format("OAuth realm=\"Twitter API\",{0}", BondSignature(normalizedReqParams, Uri.EscapeDataString(oauthSignature)));
 				req.Headers.Add(HttpRequestHeader.Authorization, signature);
 				req.Method = "POST";
+				req.UserAgent = "TwitterAPI";
 				if (!string.IsNullOrEmpty(contentType)) req.ContentType = contentType;
 
-				if (data != null) using (Stream stream = req.GetRequestStream()) stream.Write(data, 0, data.Length);
+				System.Diagnostics.Debug.WriteLine(req.Headers["Authorization"]);
 
-				System.Diagnostics.Debug.WriteLine(req.Headers);
+
+				if (data != null)
+				{
+					using (var stream = req.GetRequestStream())
+					{
+						stream.Write(data, 0, data.Length);
+					}
+				}
 			}
-
-
-			ServicePointManager.Expect100Continue = false;
 
 			return req;
 		}
@@ -117,14 +122,15 @@ namespace TwitterAPI
 
 			try
 			{
-				var res = req.GetResponse();
-				using (var reader = new StreamReader(res.GetResponseStream()))
-					result.ResponseStream = reader.ReadToEnd();
-				result.Result = StatusResult.Success;
-				result.AccessLevel = WebHeaderToAccessLevel(res.Headers);
-				result.RateLimited = new RateLimited(res.Headers[XRateLimitLimit], res.Headers[XRateLimitRemaining], res.Headers[XRateLimitRemaining]);
-				result.Url = res.ResponseUri.ToString();
-				res.Close();
+				using (var res = req.GetResponse())
+				{
+					using (var reader = new StreamReader(res.GetResponseStream()))
+						result.ResponseStream = reader.ReadToEnd();
+					result.Result = StatusResult.Success;
+					result.AccessLevel = WebHeaderToAccessLevel(res.Headers);
+					result.RateLimited = new RateLimited(res.Headers[XRateLimitLimit], res.Headers[XRateLimitRemaining], res.Headers[XRateLimitRemaining]);
+					result.Url = res.ResponseUri.ToString();
+				}
 			}
 			catch (Exception exception)
 			{
@@ -162,7 +168,7 @@ namespace TwitterAPI
 					{
 						throw new Exception();
 					}
-					
+
 					result.AccessLevel = WebHeaderToAccessLevel(ex.Response.Headers);
 					result.RateLimited = new RateLimited(ex.Response.Headers[XRateLimitLimit], ex.Response.Headers[XRateLimitRemaining], ex.Response.Headers[XRateLimitRemaining]);
 					result.Url = ex.Response.ResponseUri.ToString();
@@ -176,6 +182,22 @@ namespace TwitterAPI
 			return result;
 		}
 
+		private static string BondSignature(string SignatureBase, string Signature)
+		{
+			var parms = new List<string>(string.Format("{0}&oauth_signature={1}", SignatureBase, Signature).Split('&'));
+
+			var dic = new SortedDictionary<string, string>();
+			foreach (var param in parms)
+			{
+				var p = param.Split('=');
+				dic.Add(p[0], p[1]);
+			}
+
+			parms.Clear();
+			foreach (var p in dic) parms.Add(string.Format("{0}=\"{1}\"", p.Key, p.Value));
+
+			return string.Join(",", parms);
+		}
 
         private static bool IsNumeric(object o)
         {
@@ -267,12 +289,12 @@ namespace TwitterAPI
 			return GenerateResponseResult(GenerateWebRequest(url, WebMethod.POST, tokens, parameters, contentType, postHeader, data));
 		}
 
-		public static ResponseResult PostText(string reqUrl, OAuthTokens tokens, string data, ParameterClass param)
+		/*public static ResponseResult PostText(string reqUrl, OAuthTokens tokens, string data, ParameterClass param)
 		{
 			var req = GenerateWebRequest(reqUrl, WebMethod.POST, tokens, param, null,null, null);
 			if (!string.IsNullOrEmpty(data)) req.Headers[HttpRequestHeader.Authorization] += Uri.EscapeDataString("&" + data);
 			return GenerateResponseResult(req);
-		}
+		}*/
 
         public static StatusResult GetStatusResult(WebExceptionStatus status)
         {
@@ -415,15 +437,16 @@ namespace TwitterAPI
         public Parameters(string ParameterName)
         {
             this.ParmaterName = ParameterName;
+			Method = ParameterMethodType.GET;
         }
 
-        public Parameters(string ParameterName, string Method)
+        public Parameters(string ParameterName, ParameterMethodType Method)
         {
             this.ParmaterName = ParameterName;
             this.Method = Method;
         }
 
-        public Parameters(string ParameterName, string Method, bool UrlEncode)
+		public Parameters(string ParameterName, ParameterMethodType Method, bool UrlEncode)
         {
             this.ParmaterName = ParameterName;
             this.Method = Method;
@@ -438,7 +461,7 @@ namespace TwitterAPI
         /// <summary>
         /// メソッド(GET/POST)
         /// </summary>
-        public string Method = "GET";
+		public ParameterMethodType Method { get; set; }
 
         /// <summary>
         /// Urlエンコードを行うかどうか
@@ -446,46 +469,17 @@ namespace TwitterAPI
         public bool UrlEncode = false;
     }
 
+	public enum ParameterMethodType
+	{
+		GET,
+		POST,
+		POSTData,
+		Bearer,
+	}
 
     public class ParameterClass
     {
-        /// <summary>
-        /// プロパティと属性からGETパラメータを生成します
-        /// </summary>
-        /// <returns></returns>
-        public string GenerateGetParameters()
-        {
-            var param = new List<string>();
-
-            var type = this.GetType();
-
-            MemberInfo[] members = type.GetMembers(
-                BindingFlags.Public | BindingFlags.NonPublic |
-                BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
-            foreach (MemberInfo m in members)
-            {
-                if (m.MemberType == MemberTypes.Property)
-                {
-                    var property = type.GetProperty(m.Name);
-                    var attr = Attribute.GetCustomAttribute(m, typeof(Parameters));
-                    var attribute = attr as Parameters;
-                    if (attribute != null && !string.IsNullOrEmpty(attribute.ParmaterName))
-                    {
-                        if (attribute.Method.ToLower() == "get")
-                            if (property.GetValue(this, null) != null)
-                                param.Add(string.Format("{0}={1}", attribute.ParmaterName, property.GetValue(this, null)));
-                    }
-                    else
-                    {
-                        if (property.GetValue(this, null) != null)
-                            param.Add(string.Format("{0}={1}", m.Name, property.GetValue(this, null).ToString()));
-                    }
-                }
-            }
-            return param.Count > 0 ? "?" + string.Join("&", param) : string.Empty;
-        }
-
-		public string GenerateParameters(string paramName, bool AddFirstmark = true)
+		public string GenerateParameters(ParameterMethodType paramName, bool AddFirstmark = true)
 		{
 			var param = new List<string>();
 
@@ -503,7 +497,7 @@ namespace TwitterAPI
 					var attribute = attr as Parameters;
 					if (attribute != null && !string.IsNullOrEmpty(attribute.ParmaterName))
 					{
-						if (attribute.Method.ToLower() == paramName.ToLower())
+						if (attribute.Method == paramName)
 							if (property.GetValue(this, null) != null)
 								param.Add(string.Format("{0}={1}", attribute.ParmaterName, property.GetValue(this, null)));
 					}
@@ -517,35 +511,24 @@ namespace TwitterAPI
 			return param.Count > 0 ? (AddFirstmark ? "?" + string.Join("&", param) : string.Join("&", param)) : string.Empty;
 		}
 
+
+		/// <summary>
+		/// プロパティと属性からGETパラメータを生成します
+		/// </summary>
+		/// <returns></returns>
+		public string GenerateGetParameters()
+		{
+			return GenerateParameters(ParameterMethodType.GET);
+		}
+
+
         /// <summary>
-        /// ポロパティと属性からPOSTパラメータを抽出します
+        /// プロパティと属性からPOSTパラメータを抽出します
         /// </summary>
         /// <returns></returns>
         public string GeneratePostParameters()
         {
-            var param = new List<string>();
-
-            var type = this.GetType();
-
-            MemberInfo[] members = type.GetMembers(
-                BindingFlags.Public | BindingFlags.NonPublic |
-                BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
-            foreach (MemberInfo m in members)
-            {
-                if (m.MemberType == MemberTypes.Property)
-                {
-                    var property = type.GetProperty(m.Name);
-                    var attr = Attribute.GetCustomAttribute(m, typeof(Parameters));
-                    var attribute = attr as Parameters;
-                    if (attribute != null)
-                    {
-                        if (attribute.Method.ToLower() == "post")
-                            if (property.GetValue(this, null) != null)
-                                param.Add(string.Format("{0}={1}", attribute.ParmaterName, property.GetValue(this, null).GetType().ToString()));
-                    }
-                }
-            }
-            return param.Count > 0 ? "?" + string.Join("&", param) : string.Empty;
+			return GenerateParameters(ParameterMethodType.POST);
         }
     }
 }

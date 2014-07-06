@@ -71,7 +71,7 @@ namespace TwitterAPI
                         try { this.ResponseObject = JsonConvert.DeserializeObject<T>(res.ResponseStream); }
                         catch(Exception) { this.Result = StatusResult.ParseError; }
                     }
-                }
+				}
             }
         }
     }

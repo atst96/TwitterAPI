@@ -11,7 +11,6 @@ namespace TwitterAPI
 {
     public static partial class TwitterTimeline
     {
-
 		private static TwitterResponse<TwitterStatusCollection> GetTimeline(string Url, OAuthTokens tokens, TimelineOptions options = null)
 		{
 			var res = new TwitterResponse<TwitterStatusCollection>(Method.Get(Url, tokens, options));
@@ -62,7 +61,6 @@ namespace TwitterAPI
 		{
 			return GetTimeline(UrlBank.HomeTimeline, tokens, options);
 		}
-
 
         public class TimelineOptions : ParameterClass
         {

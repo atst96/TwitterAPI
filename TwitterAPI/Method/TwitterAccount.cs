@@ -27,22 +27,22 @@ namespace TwitterAPI
 
 		public class UpdateProfileOption : ParameterClass
 		{
-			[Parameters("name", "POST")]
+			[Parameters("name", ParameterMethodType.POST)]
 			public string Name { get; set; }
 
-			[Parameters("url", "POST")]
+			[Parameters("url", ParameterMethodType.POST)]
 			public string Url { get; set; }
 
-			[Parameters("location", "POST")]
+			[Parameters("location", ParameterMethodType.POST)]
 			public string Location { get; set; }
 
-			[Parameters("description", "POST")]
+			[Parameters("description", ParameterMethodType.POST)]
 			public string Description { get; set; }
 
-			[Parameters("include_entities", "POST")]
+			[Parameters("include_entities", ParameterMethodType.POST)]
 			public bool? IncludeEntities { get; set; }
 
-			[Parameters("skip_status", "POST")]
+			[Parameters("skip_status", ParameterMethodType.POST)]
 			public bool? SkipStatus { get; set; }
 		}
 	}

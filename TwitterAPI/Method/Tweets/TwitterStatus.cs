@@ -26,7 +26,6 @@ namespace TwitterAPI
                     System.Globalization.DateTimeFormatInfo.InvariantInfo,
                     System.Globalization.DateTimeStyles.None);
             }
-            set { CreateDate = value; }
         }
 
         /// <summary>

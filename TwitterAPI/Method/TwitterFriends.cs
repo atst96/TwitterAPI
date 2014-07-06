@@ -38,16 +38,30 @@ namespace TwitterAPI
 			return new TwitterResponse<UserIds>(Method.Get(string.Format("{0}?stringify_ids=false", UrlBank.FriendshiptsOutgoing), tokens));
 		}
 
+
+		/// <summary>
+		/// フォローする
+		/// </summary>
+		/// <param name="tokens">トークン</param>
+		/// <param name="UserId">ユーザID</param>
+		/// <param name="Follow">フォロー通知の有無</param>
 		public static TwitterResponse<TwitterUser> Create(OAuthTokens tokens, decimal UserId, bool Follow = true)
 		{
-			var data = string.Format("user_id={0}", UserId, Follow ? "true" : "false");
-			return new TwitterResponse<TwitterUser>(Method.Post(UrlBank.FriendshipsCreate, tokens, null, "application/x-www-form-urlencoded", data, Encoding.UTF8.GetBytes(data)));
+			var data = string.Format("user_id={0}&follow={1}", UserId, Follow.ToString().ToLower());
+			return new TwitterResponse<TwitterUser>(Method.Post(string.Format("{0}?{1}", UrlBank.FriendshipsCreate, data), tokens, null, "application/x-www-form-urlencoded", null, null));
 		}
 
+
+		/// <summary>
+		/// フォローする
+		/// </summary>
+		/// <param name="tokens">トークン</param>
+		/// <param name="UserId">ScreenName</param>
+		/// <param name="Follow">フォロー通知の有無</param>
 		public static TwitterResponse<TwitterUser> Create(OAuthTokens tokens, string ScreenName, bool Follow = true)
 		{
-			var data = string.Format("screen_name={0}", ScreenName, Follow ? "true" : "false");
-			return new TwitterResponse<TwitterUser>(Method.Post(UrlBank.FriendshipsCreate, tokens, null, "application/x-www-form-urlencoded", data, Encoding.UTF8.GetBytes(data)));
+			var data = string.Format("screen_name={0}&follow={1}", ScreenName, Follow.ToString().ToLower());
+			return new TwitterResponse<TwitterUser>(Method.Post(string.Format("{0}?{1}", UrlBank.FriendshipsCreate, data), tokens, null, "application/x-www-form-urlencoded", null, null));
 		}
 
 		public static TwitterResponse<TwitterUser> Destroy(OAuthTokens tokens, decimal UserId)
@@ -60,6 +74,16 @@ namespace TwitterAPI
 		{
 			var data = string.Format("screen_name={0}", ScreenName);
 			return new TwitterResponse<TwitterUser>(Method.Post(UrlBank.FriendshipsDestroy, tokens, null, "application/x-www-form-urlencoded", data, Encoding.UTF8.GetBytes(data)));
+		}
+
+		public static TwitterResponse<TwitterRelationship> Update(OAuthTokens tokens, FriendshipsUpdateOption option)
+		{
+			return new TwitterResponse<TwitterRelationship>(Method.Post(UrlBank.FriendshipsUpdate, tokens, option, "application/x-www-form-urlencoded", null, null));
+		}
+
+		public static TwitterResponse<TwitterRelationship> Show(OAuthTokens tokens, FriendshipShowOption option)
+		{
+			return new TwitterResponse<TwitterRelationship>(Method.Get(UrlBank.FriendshipsShow, tokens, option));
 		}
 
 		public static TwitterResponse<TwitterUserCollection> FriendsList(OAuthTokens tokens)
@@ -102,4 +126,91 @@ namespace TwitterAPI
 		[Parameters("next_cursor_str")]
 		public string StringNextCursor { get; set; }
 	}
+
+	public class FriendshipsUpdateOption : ParameterClass
+	{
+		[Parameters("screen_name")]
+		public string ScreenName { get; set; }
+
+		[Parameters("user_id")]
+		public decimal? UserId { get; set; }
+
+		[Parameters("device")]
+		public bool? Device { get; set; }
+
+		[Parameters("retweets")]
+		public bool? Retweets { get; set; }
+	}
+
+	public class FriendshipShowOption : ParameterClass
+	{
+		[Parameters("source_id")]
+		public decimal? SourceId { get; set; }
+
+		[Parameters("source_screen_name")]
+		public string SourceScreenName { get; set; }
+
+		[Parameters("target_id")]
+		public decimal? TargetId { get; set; }
+
+		[Parameters("target_screen_name")]
+		public string TargetScreenName { get; set; }
+	}
+
+	[DataContract]
+	public class TwitterRelationship
+	{
+		[DataMember(Name = "target")]
+		public _Target Target { get; set; }
+
+		[DataMember(Name = "source")]
+		public _Source Source { get; set; }
+
+
+		[DataContract]
+		public class _Target
+		{
+			[DataMember(Name = "target")]
+			public string StringId { get; set; }
+
+			[DataMember(Name = "id")]
+			public decimal Id { get; set; }
+
+			[DataMember(Name = "followed_by")]
+			public bool FollowedBy { get; set; }
+
+			[DataMember(Name = "screen_name")]
+			public string ScreenName { get; set; }
+
+			[DataMember(Name = "following")]
+			public bool Following { get; set; }
+		}
+
+		[DataContract]
+		public class _Source : _Target
+		{
+			[DataMember(Name = "can_dm")]
+			public bool? CanDM { get; set; }
+
+			[DataMember(Name = "blocking")]
+			public bool? Blocking { get; set; }
+
+			[DataMember(Name = "muting")]
+			public bool? Muting { get; set; }
+
+			[DataMember(Name = "all_replies")]
+			public bool? AllReplies { get; set; }
+
+			[DataMember(Name = "want_retweets")]
+			public bool? WantRetweets { get; set; }
+
+			[DataMember(Name = "marked_spam")]
+			public bool? MarkedSpam { get; set; }
+
+			[DataMember(Name = "notifications_enabled")]
+			public bool? NotificationsEnabled { get; set; }
+		}
+	}
+
+
 }
