@@ -53,7 +53,7 @@ namespace TwitterAPI
 
         public TwitterResponse() { }
 
-        public TwitterResponse(ResponseResult res, bool SetObject = true)
+        public TwitterResponse(ResponseResult res, ParseType type = ParseType.Json)
         {
             if (res != null)
             {
@@ -64,7 +64,7 @@ namespace TwitterAPI
                 this.Error = res.Error;
                 Source = res.ResponseStream;
 
-                if (SetObject)
+                if (type == ParseType.Json)
                 {
                     if (res.Result == StatusResult.Success)
                     {
@@ -75,5 +75,11 @@ namespace TwitterAPI
             }
         }
     }
+
+	public enum ParseType
+	{
+		None,
+		Json,
+	}
 
 }

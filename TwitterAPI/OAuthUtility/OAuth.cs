@@ -41,7 +41,7 @@ namespace TwitterAPI
 		/// <param name="ConsumerKey">ConsumerKey</param>
 		/// <param name="ConsumerSecret">ConsumerSecret</param>
 		/// <returns>認証用のURL</returns>
-		public static OAuthTokenClass GetRequestUrl(string ConsumerKey, string ConsumerSecret)
+		public static TwitterResponse<OAuthTokenResponse> GetRequestUrl(string ConsumerKey, string ConsumerSecret)
 		{
 			// Nonceの生成
 			nonce = oauth.GenerateNonce();
@@ -62,29 +62,22 @@ namespace TwitterAPI
 				+ "&oauth_signature=" + Method.UrlEncode(signature);
 
 			var req = WebRequest.Create(reqTokenUrl) as HttpWebRequest;
+			var _res = Method.GenerateResponseResult(WebRequest.Create(reqTokenUrl) as HttpWebRequest);
 
-			try
-			{
-				var res = req.GetResponse();
-				var reader = new StreamReader(res.GetResponseStream());
+			var res = new TwitterResponse<OAuthTokenResponse>(_res, ParseType.None);
+			if (res.Result == StatusResult.Success)
+				res.ResponseObject = new OAuthTokenResponse(_res.ResponseStream);
 
-				string str = reader.ReadToEnd();
-				var token = new OAuthTokenClass(str);
-
-				res.Close(); reader.Close();
-
-				return token;
-
-			}
-			catch (WebException ex)
-			{
-				/*using (StreamReader rdr = new StreamReader(ex.Response.GetResponseStream()))
-					System.Windows.Forms.MessageBox.Show(rdr.ReadToEnd());
-				throw ex;*/
-				return null;
-			}
+			return res;
 		}
 
+
+		/// <summary>
+		/// Bearer の取得
+		/// </summary>
+		/// <param name="consumerKey">ConsumerKey</param>
+		/// <param name="consumerSecret">ConsumerSecret</param>
+		/// <returns>TwitterResponse</returns>
 		public static TwitterResponse<string> GetBearer(string consumerKey, string consumerSecret)
 		{
 			string url = "https://api.twitter.com/oauth2/token";
@@ -95,7 +88,7 @@ namespace TwitterAPI
 
 			byte[] data = Encoding.UTF8.GetBytes("grant_type=client_credentials");
 
-			HttpWebRequest req = WebRequest.Create(url) as HttpWebRequest;
+			var req = WebRequest.Create(url) as HttpWebRequest;
 			req.Proxy = null;
 			req.Method = "POST";
 			req.Headers.Add("Authorization", credentail);
@@ -105,7 +98,7 @@ namespace TwitterAPI
 			using (Stream stream = req.GetRequestStream())
 				stream.Write(data, 0, data.Length);
 
-			var res = new TwitterResponse<string>(Method.GenerateResponseResult(req), false);
+			var res = new TwitterResponse<string>(Method.GenerateResponseResult(req), ParseType.None);
 
 			if (res.Result == StatusResult.Success)
 			{
@@ -117,6 +110,7 @@ namespace TwitterAPI
 			return res;
 		}
 
+
         /// <summary>
         /// AccessTokenを取得
         /// </summary>
@@ -126,7 +120,7 @@ namespace TwitterAPI
         /// <param name="TokenSecret">AccessTokenSecret</param>
         /// <param name="Verifier">PINコード</param>
         /// <returns>OAuthTokenResponse</returns>
-        public static OAuthTokenResponse GetAccessToken(string ConsumerKey, string ConsumerSecret, string Token, string TokenSecret, string Verifier)
+        public static TwitterResponse<AccessTokenResponse> GetAccessToken(string ConsumerKey, string ConsumerSecret, string Token, string TokenSecret, string Verifier)
         {
             string normalizedUrl, normalizedReqParam;
 
@@ -138,26 +132,17 @@ namespace TwitterAPI
             // AccessToken用のURLを生成
             string accessTokenUrl = string.Format("{0}?{1}&oauth_signature={2}&oauth_verifier={3}",
                 UrlBank.OAuthAccessToken, normalizedReqParam, UrlEncode(signature), Verifier);
+               
+			var _res = Method.GenerateResponseResult(WebRequest.Create(accessTokenUrl) as HttpWebRequest);
 
-            try
-            {
-                // レスポンスの取得
-                WebRequest req = WebRequest.Create(accessTokenUrl);
-                WebResponse res = req.GetResponse();
-                StreamReader sr = new StreamReader(res.GetResponseStream(), Encoding.GetEncoding("Shift_JIS"));
+			var res = new TwitterResponse<AccessTokenResponse>(_res, ParseType.None);
 
-                // (独自クラス) レスポンスの文字列からOAuth情報を取得
-                OAuthTokenResponse response = new OAuthTokenResponse(sr.ReadToEnd());
+			if (res.Result == StatusResult.Success)
+				res.ResponseObject = new AccessTokenResponse(_res.ResponseStream);
 
-                res.Close(); sr.Close();
-
-                return response;
-            }
-            catch (WebException)
-            {
-                return null;
-            }
+			return res;
         }
+
 
         /// <summary>
         /// URLエンコード
@@ -168,13 +153,13 @@ namespace TwitterAPI
         /// <summary>
         /// OAuthToken取得用クラス
         /// </summary>
-        public class OAuthTokenClass
+        public class OAuthTokenResponse
         {
             /// <summary>
             /// OAuthTokenを取得
             /// </summary>
             /// <param name="RequestToken">リクエストトークンURL</param>
-            public OAuthTokenClass(string RequestToken)
+            public OAuthTokenResponse(string RequestToken)
             {
                 string TokenPattern = "oauth_token=(.*?)&oauth_token_secret=(.*?)&oauth_callback_confirmed=(true|false)";
                 if (Regex.IsMatch(RequestToken, TokenPattern))
@@ -196,15 +181,15 @@ namespace TwitterAPI
         /// <summary>
         /// AccessToken取得用クラス
         /// </summary>
-        public class OAuthTokenResponse
+        public class AccessTokenResponse
         {
-            public OAuthTokenResponse() { }
+            public AccessTokenResponse() { }
 
             /// <summary>
             /// AccessTokenを取得
             /// </summary>
             /// <param name="AccessTokenUrl">アクセストークン</param>
-            public OAuthTokenResponse(string AccessTokenStr)
+            public AccessTokenResponse(string AccessTokenStr)
             {
                 string[] param = AccessTokenStr.Split('&');
                 Dictionary<string, string> dics = new Dictionary<string, string>();

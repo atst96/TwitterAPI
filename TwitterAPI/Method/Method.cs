@@ -140,38 +140,44 @@ namespace TwitterAPI
 
 					result.Result = GetStatusResult(ex.Status);
 					result.ResponseStream = null;
-
-					var stream = ex.Response.GetResponseStream();
-					if (stream != null)
-					{
-						using (var reader = new StreamReader(stream))
-						{
-							var obj = (JObject)JsonConvert.DeserializeObject(reader.ReadToEnd());
-							var errors = obj.SelectToken("errors", false);
-							if (errors != null)
-							{
-								if (errors.Type == JTokenType.String)
-								{
-									result.Error = new TwitterError();
-									result.Error.Message = errors.ToString();
-								}
-								else if (errors.Type == JTokenType.Array)
-								{
-									result.Error = new TwitterError();
-									result.Error = JsonConvert.DeserializeObject<List<TwitterError>>(errors.ToString())[0];
-								}
-
-							}
-						}
-					}
-					else
-					{
-						throw new Exception();
-					}
-
 					result.AccessLevel = WebHeaderToAccessLevel(ex.Response.Headers);
 					result.RateLimited = new RateLimited(ex.Response.Headers[XRateLimitLimit], ex.Response.Headers[XRateLimitRemaining], ex.Response.Headers[XRateLimitRemaining]);
 					result.Url = ex.Response.ResponseUri.ToString();
+
+					try
+					{
+						var stream = ex.Response.GetResponseStream();
+						if (stream != null)
+						{
+							using (var reader = new StreamReader(stream))
+							{
+								var obj = (JObject)JsonConvert.DeserializeObject(reader.ReadToEnd());
+								var errors = obj.SelectToken("errors", false);
+								if (errors != null)
+								{
+									if (errors.Type == JTokenType.String)
+									{
+										result.Error = new TwitterError();
+										result.Error.Message = errors.ToString();
+									}
+									else if (errors.Type == JTokenType.Array)
+									{
+										result.Error = new TwitterError();
+										result.Error = JsonConvert.DeserializeObject<List<TwitterError>>(errors.ToString())[0];
+									}
+
+								}
+							}
+						}
+						else
+						{
+							throw new Exception();
+						}
+					}
+					catch (Exception)
+					{
+						//throw;
+					}
 				}
 				else
 				{
@@ -204,85 +210,6 @@ namespace TwitterAPI
             return o is sbyte || o is byte || o is short || o is ushort || o is int || o is uint ||
                 o is long || o is long || o is ulong || o is float || o is double || o is decimal;
         }
-
-
-		//public static ResponseResult xAuthOAuthGet(string url, OAuthTokens tokens, string username, string password, Dictionary<string, string> param = null, string mode = "client_auth")
-		//{
-		//	var oauth = new OAuthBase();
-
-		//	// タイムスタンプの生成
-		//	var timestamp = oauth.GenerateTimeStamp();
-
-		//	// nonceの生成
-		//	var nonce = oauth.GenerateNonce();
-
-		//	string normalizedUrl, normalizedReqParams;
-
-		//	// DictionaryをURLのパラメータに変換
-		//	if (param != null)
-		//	{
-		//		url += ConvertMethod.DictionaryToParams(param);
-		//	}
-
-		//	// シグネチャの生成
-		//	string signature = oauth.GenerateSignature(new Uri(url),
-		//		tokens.ConsumerKey, tokens.ConsumerSecret, tokens.AccessToken, tokens.AccessTokenSecret,
-		//		"GET", timestamp, nonce, out normalizedUrl, out normalizedReqParams);
-
-		//	string requestUrl = string.Format("{0}?{1}&oauth_signature={2}",
-		//		normalizedUrl, normalizedReqParams, Uri.EscapeDataString(signature));
-
-		//	var req = WebRequest.Create(requestUrl);
-
-		//	var result = new ResponseResult();
-
-		//	try
-		//	{
-		//		var res = req.GetResponse();
-		//		var reader = new StreamReader(res.GetResponseStream());
-		//		result.ResponseStream = reader.ReadToEnd();
-		//		result.Result = StatusResult.Success;
-
-		//		result.AccessLevel = StringToLevelEnum(res.Headers["x-access-level"]);
-		//		result.RateLimited = new RateLimited(res.Headers["x-rate-limit-limit"],
-		//			res.Headers["x-rate-limig-remaining"], res.Headers["x-rate-limit-reset"]);
-
-		//		result.Url = res.ResponseUri.ToString();
-
-		//		res.Close();
-		//	}
-		//	catch (WebException ex)
-		//	{
-		//		result.Result = GetStatusResult(ex.Status);
-		//		result.ResponseStream = null;
-		//		using (var reader = new StreamReader(ex.Response.GetResponseStream()))
-		//		{
-		//			var obj = (JObject)JsonConvert.DeserializeObject(reader.ReadToEnd());
-		//			var errors = obj.SelectToken("errors", false);
-		//			if (errors != null)
-		//			{
-		//				if (errors.Type == JTokenType.String)
-		//				{
-		//					result.Error = new TwitterError();
-		//					result.Error.Message = errors.ToString();
-		//				}
-		//				else if (errors.Type == JTokenType.Array)
-		//				{
-		//					result.Error = new TwitterError();
-		//					result.Error = JsonConvert.DeserializeObject<List<TwitterError>>(errors.ToString())[0];
-		//				}
-
-		//			}
-		//		}
-		//		result.AccessLevel = StringToLevelEnum(ex.Response.Headers["x-access-level"]);
-		//		result.RateLimited = new RateLimited(ex.Response.Headers["x-rate-limit-limit"],
-		//			ex.Response.Headers["x-rate-limit-remaining"], ex.Response.Headers["x-rate-limit-reset"]);
-		//		result.Url = ex.Response.ResponseUri.ToString();
-
-		//	}
-
-		//	return result;
-		//}
 
 		public static ResponseResult Post(string url, OAuthTokens tokens, ParameterClass parameters, string contentType, string postHeader, byte[] data)
 		{
